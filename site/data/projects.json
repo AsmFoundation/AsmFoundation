@@ -1,6 +1,6 @@
 // The Projects page's datasheets, in the order shown. Every speed figure carries its one-core number
-// (the owner's rule: "1 core everywhere"), and every figure comes from the source named in evidence.json
-// or the project's own claims ledger. Change a figure here and on the Evidence page together.
+// (the owner's rule: "1 core everywhere"), and every figure comes from the source named in benchmarks.json
+// or the project's own claims ledger. Change a figure here and on the Benchmarks page together.
 {
   "projects": [
     {

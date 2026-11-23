@@ -2,8 +2,8 @@
 
 The foundation's own repository. It holds the source of the website at
 **[asmfoundation.github.io](https://asmfoundation.github.io/)**: the home page, the projects' datasheets, the
-evidence, the map, the docs hub, the getting-started session and the foundation's history. It will also hold
-the benchmarks project (see [Planned](#planned)).
+benchmarks, the architecture, the docs hub, the getting-started session and the foundation's history. It
+will also hold the benchmarks project (see [Planned](#planned)).
 
 AsmFoundation builds **FOSAS, Free Open Source Assembly Software**: the services clouds run on, hand-written
 in x86-64 assembly and released under Apache-2.0, with every speed claim linked to the run that measured it.
@@ -50,8 +50,8 @@ in a shell must not break a build.
 | To change | Edit |
 |---|---|
 | A figure on a datasheet | `site/data/projects.json` |
-| A chart on the Evidence page | `site/data/evidence.json` |
-| A room on the Map | `site/data/services.json` |
+| A chart on the Benchmarks page | `site/data/benchmarks.json` |
+| A room on the Architecture page | `site/data/architecture.json` |
 | The Docs table of contents | `site/data/docs.json` |
 | A milestone in the About log | `site/data/milestones.json` |
 | A section of Get started | `site/get-started/*.md`, one file per section |
@@ -62,7 +62,7 @@ in a shell must not break a build.
 The generator, `site/build.cs`, documents every format it reads. Its rules, which a build enforces:
 
 - **A page** starts with its front matter in an HTML comment (`title`, `path`, `nav`, ...). A marker
-  `<!-- @name -->` in its body places a generated part: `projects`, `evidence`, `docs`, `map`,
+  `<!-- @name -->` in its body places a generated part: `projects`, `benchmarks`, `docs`, `architecture`,
   `get-started` or `history`.
 - **A Get started section** is a Markdown file with a `title` (and optionally a `group`) in its front matter.
   Each `### Step` starts a step: its code goes on the left, everything else becomes the note on the right.
@@ -74,7 +74,7 @@ The generator, `site/build.cs`, documents every format it reads. Its rules, whic
 The owner's design rules for the site:
 
 - **One core everywhere.** Every performance figure gives its one-core number next to any other.
-- **Every figure names its source**, and the Evidence page shows where assembly loses as well as where it
+- **Every figure names its source**, and the Benchmarks page shows where assembly loses as well as where it
   wins.
 - **White paper, ink type.** The logo's mint and teal are ink, bars and small blocks, never a background.
   Archivo, expanded, for headings; Martian Mono only for code and data.
@@ -99,7 +99,7 @@ as `PAGES_DEPLOY_KEY` here, and delete the old key.
 
 **[The benchmarks project](benchmarks/README.md)**: the same work written in C#, C++, Go, Java,
 JavaScript, Python, Rust and Zig, each at its best, measured against the assembly, with every result on
-the Evidence page. It lives here, as a folder of this repository, not as a repository of its own. Its
+the Benchmarks page. It lives here, as a folder of this repository, not as a repository of its own. Its
 scope and rules were decided on 2026-11-23 (six kernels first, services later); nothing is measured yet.
 
 ## License

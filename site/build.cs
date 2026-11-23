@@ -245,7 +245,7 @@ static class Layout
     /// <summary>The navigation, in order. Hrefs without a scheme are site pages, resolved against the page's root.</summary>
     static readonly (string Text, string Href)[] NavItems =
     [
-        ("Projects", "projects/"), ("Docs", "docs/"), ("Evidence", "evidence/"), ("Map", "map/"),
+        ("Projects", "projects/"), ("Docs", "docs/"), ("Benchmarks", "benchmarks/"), ("Architecture", "architecture/"),
         ("Get started", "get-started/"), ("About", "about/"), ("GitHub", "https://github.com/AsmFoundation"),
     ];
 
@@ -424,16 +424,16 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
     };
 
     /// <summary>Renders the part a marker names.</summary>
-    /// <param name="name">The marker's name: projects, evidence, docs, map, get-started or history.</param>
+    /// <param name="name">The marker's name: projects, benchmarks, docs, architecture, get-started or history.</param>
     /// <param name="page">The page holding the marker, for error messages.</param>
     /// <returns>The part's HTML.</returns>
     /// <exception cref="BuildException">No part has that name, or the part's data is malformed.</exception>
     public string Render(string name, PageSource page) => name switch
     {
         "projects" => Projects(),
-        "evidence" => Evidence(),
+        "benchmarks" => Benchmarks(),
         "docs" => Docs(),
-        "map" => Map(),
+        "architecture" => Architecture(),
         "get-started" => GetStarted(),
         "history" => Log(),
         _ => throw new BuildException($"{page.Name}: no generated part is called @{name}."),
@@ -448,7 +448,7 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
     static string Status(string status, string where, params string[] allowed) =>
         allowed.Contains(status) ? status : throw new BuildException($"{where}: status \"{status}\" must be one of {string.Join(", ", allowed)}.");
 
-    /// <summary>The key of status colours, shared by the Map and any page that marks states.</summary>
+    /// <summary>The key of status colours, shared by the Architecture page and any page that marks states.</summary>
     /// <returns>The key's HTML.</returns>
     static string Key() =>
         "<div class=\"key\" aria-label=\"Key\">" +
@@ -490,21 +490,21 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         return sb.Append("</div>").ToString();
     }
 
-    // ------------------------------------------------------------------------------------------ Evidence
+    // ------------------------------------------------------------------------------------------ Benchmarks
 
-    /// <summary>The Evidence page: one bar chart per entry of data/evidence.json, with a table view and its source.</summary>
+    /// <summary>The Benchmarks page: one bar chart per entry of data/benchmarks.json, with a table view and its source.</summary>
     /// <returns>The charts' HTML.</returns>
     /// <exception cref="BuildException">A chart lacks a field, or a value lies outside 0..max (the bar would overflow its track).</exception>
     /// <remarks>Bars are plain HTML, so the charts read without JavaScript; site.js only adds tooltips. Our bar and the
     /// rows flagged <c>show</c> carry their value; every other value is in the tooltip and the table, so no chart
     /// prints a number on every bar.</remarks>
-    string Evidence()
+    string Benchmarks()
     {
         var sb = new StringBuilder("<div class=\"charts\">");
-        foreach (var c in data["evidence"].Arr("charts", "evidence.json"))
+        foreach (var c in data["benchmarks"].Arr("charts", "benchmarks.json"))
         {
-            var title = c.Str("title", "evidence.json");
-            var where = $"evidence.json: {title}";
+            var title = c.Str("title", "benchmarks.json");
+            var where = $"benchmarks.json: {title}";
             var max = c.Num("max", where);
             if (max <= 0) throw new BuildException($"{where}: max must be above zero.");
             sb.Append($"<section class=\"chart\" id=\"{H.Slug(title)}\"><h2>{H.E(title)}</h2><p class=\"q\">{H.E(c.Str("question", where))}</p><div class=\"bars\">");
@@ -557,20 +557,20 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         return sb.Append("</div>").ToString();
     }
 
-    // ------------------------------------------------------------------------------------------ Map
+    // ------------------------------------------------------------------------------------------ Architecture
 
-    /// <summary>The Map page: the foundation drawn as a building section, from data/services.json. The services are
+    /// <summary>The Architecture page: the foundation drawn as a building section, from data/architecture.json. The services are
     /// the rooms on top, eight to a floor; the protocols, the build and the machine code are the floors beneath.</summary>
     /// <returns>The key, the drawing, its readout and its date.</returns>
     /// <exception cref="BuildException">The file lacks a field or uses an unknown status.</exception>
     /// <remarks>Each room is focusable and carries its description in <c>data-d</c> ("Name: text"); site.js shows it in
     /// the readout on hover and focus. The drawing grows a floor for every eight services.</remarks>
-    string Map()
+    string Architecture()
     {
         const double x0 = 178, x1 = 1200, roomH = 90, levelH = 92, slabH = 62, top = 10;
         const int perFloor = 8;
-        var m = data["services"];
-        const string where = "services.json";
+        var m = data["architecture"];
+        const string where = "architecture.json";
         var services = m.Arr("services", where).ToList();
         var floors = (services.Count + perFloor - 1) / perFloor;
         var protoY = top + floors * roomH;
@@ -620,7 +620,7 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
                $"<p class=\"drawn\">Drawn on {H.E(m.Str("updated", where))}. A dashed outline marks a service nobody has started.</p>";
     }
 
-    /// <summary>One room of the Map's drawing; its status sets the outline, a small mint block marks a released room.</summary>
+    /// <summary>One room of the Architecture page's drawing; its status sets the outline, a small mint block marks a released room.</summary>
     /// <param name="x">The room's left edge.</param>
     /// <param name="y">The room's top edge.</param>
     /// <param name="w">The room's width.</param>

@@ -1,4 +1,4 @@
-// The Evidence page's charts, in the order shown: two per row, one core on the left, more cores on the right.
+// The Benchmarks page's charts, in the order shown: two per row, one core on the left, more cores on the right.
 // Each row of a chart: label, value (in the chart's unit, 0..max), the text shown for it, "ours" for our
 // bar, "show" to print a rival's value on its bar too. Every number is copied from the source it names.
 {

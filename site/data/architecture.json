@@ -1,4 +1,4 @@
-// The Map page's drawing. "services" are the sixteen services of the organization's banner, in its order;
+// The Architecture page's drawing. "services" are the sixteen services of the organization's banner, in its order;
 // the first eight sit on the floor above the protocols. A status is rel (released), dev (in development),
 // des (in design) or none (not started, the default). Update "updated" whenever a room changes.
 {

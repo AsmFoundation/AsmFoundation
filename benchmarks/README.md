@@ -2,10 +2,10 @@
 
 The same work, written in other languages at their best, measured against the foundation's assembly. A
 project of this repository, not a repository of its own (the owner's words: "a benchmarks project (not
-repo)"), whose results go on the website's Evidence page.
+repo)"), whose results go on the website's [Benchmarks page](https://asmfoundation.github.io/benchmarks/).
 
 > **Status: planned.** The scope below was decided on 2026-11-23; nothing is measured yet. Until a result
-> exists here, the Evidence page shows only the measurements the projects made themselves.
+> exists here, the Benchmarks page shows only the measurements the projects made themselves.
 
 ## What the owner decided (2026-11-23)
 
@@ -73,7 +73,7 @@ These are the defaults the implementation starts from; each will be reviewed whe
   Google Benchmark, `testing.B`, JMH, tinybench, `timeit`, criterion, `std.time`), on the same input
   sizes, and writes one JSON summary in a shared format. The assembly is called from a native harness
   with no foreign-function layer in between, so no entry pays for a call another does not make.
-- **The host:** the machine the Evidence page's other results come from, an Intel Core i9-13900K under
+- **The host:** the machine the Benchmarks page's other results come from, an Intel Core i9-13900K under
   Linux. Every run is pinned to the same performance core: the CPU mixes performance and efficiency cores,
   and a run must never land on the other kind.
 - **The driver:** a .NET file-based app (`run.cs`) builds every entry, verifies its outputs, runs the
