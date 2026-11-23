@@ -89,11 +89,18 @@ and every night (the history changes when any repository does). It pushes the re
 else: its private half is this repository's `PAGES_DEPLOY_KEY` secret. GitHub Pages serves that
 repository's `main` branch.
 
+Deploy keys only work while the organization allows them: AsmFoundation had them switched off for every
+repository, and the owner turned the setting on (2026-11-23) for this key. Should a push ever fail with
+"Deploy keys are disabled", the setting was switched off again. To replace the key, create a new pair,
+add its public half to asmfoundation.github.io as a deploy key with write access, store its private half
+as `PAGES_DEPLOY_KEY` here, and delete the old key.
+
 ## Planned
 
-**The benchmarks project**: the same workloads written in other languages, each at its best and fairest,
-measured against the assembly, with every result on the Evidence page. It lives here, as a folder of this
-repository, not as a repository of its own. Its workloads, languages and rules are still to be decided.
+**[The benchmarks project](benchmarks/README.md)**: the same work written in C#, C++, Go, Java,
+JavaScript, Python, Rust and Zig, each at its best, measured against the assembly, with every result on
+the Evidence page. It lives here, as a folder of this repository, not as a repository of its own. Its
+scope and rules were decided on 2026-11-23 (six kernels first, services later); nothing is measured yet.
 
 ## License
 
