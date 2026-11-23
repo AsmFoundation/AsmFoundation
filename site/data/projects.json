@@ -1,0 +1,156 @@
+// The Projects page's datasheets, in the order shown. Every speed figure carries its one-core number
+// (the owner's rule: "1 core everywhere"), and every figure comes from the source named in evidence.json
+// or the project's own claims ledger. Change a figure here and on the Evidence page together.
+{
+  "projects": [
+    {
+      "name": "KvAsm",
+      "status": "rel",
+      "stamp": "Released 0.3.0",
+      "date": "2026-11-17",
+      "summary": "A gRPC key-value server in x86-64 assembly",
+      "features": [
+        "Its own HTTP/2 engine, HPACK, gRPC and protobuf",
+        "Readers take no lock and write no shared memory",
+        "Streaming Upload and Download, CRC-32C-checked at both ends",
+        "Loads a snapshot at startup"
+      ],
+      "factsTitle": "Measured",
+      "facts": [
+        ["GET/s on 1 core", "1.76M, 1.26× Redis"],
+        ["GET/s on 4 cores", "8.84M, 2.29–3.68× five stores"],
+        ["1 MiB uploads, 1 core", "about 11 GB/s"],
+        ["h2spec", "146 of 146"]
+      ],
+      "getLabel": "Install",
+      "get": [
+        "docker run --rm -p 50051:50051 ghcr.io/asmfoundation/kvasm:0.3.0",
+        "dotnet add package KvAsm.Client"
+      ],
+      "links": [
+        { "text": "Repository", "url": "https://github.com/AsmFoundation/KvAsm" },
+        { "text": "Claims and their evidence", "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/CLAIMS.md" }
+      ]
+    },
+    {
+      "name": "AsmSdk",
+      "status": "rel",
+      "stamp": "Released 0.3.0",
+      "date": "2026-11-21",
+      "summary": "Assembly projects on MSBuild and NuGet",
+      "features": [
+        ".asmproj next to .csproj, built with dotnet build",
+        "NASM for x64, GNU syntax for ARM64",
+        "Windows, Linux and macOS, on x64 and ARM64",
+        "The assembler and linker restore from NuGet"
+      ],
+      "factsTitle": "Facts",
+      "facts": [
+        ["Platforms", "7 runtime identifiers"],
+        ["Toolchain", "NASM 3.02 and LLVM 23.1.5"],
+        ["CRC-32C sample, 1 core", "21.8 GB/s, 3.7× the C# loop"],
+        ["Licence", "Apache-2.0"]
+      ],
+      "getLabel": "Install, in global.json",
+      "get": ["{ \"msbuild-sdks\": { \"AsmFoundation.Sdk\": \"0.3.0\" } }"],
+      "links": [
+        { "text": "Documentation", "url": "https://asmfoundation.github.io/AsmSdk/" },
+        { "text": "Repository", "url": "https://github.com/AsmFoundation/AsmSdk" }
+      ]
+    },
+    {
+      "name": "GrpcAsm",
+      "status": "dev",
+      "stamp": "In development",
+      "date": "since 2026-11-17",
+      "summary": "A gRPC server and client in x86-64 assembly",
+      "features": [
+        "Services declared in NASM, dispatch generated at assembly time",
+        "A C ABI, with NASM and .NET APIs on top",
+        "Hosts a grpc-dotnet service class unchanged"
+      ],
+      "factsTitle": "Measured",
+      "facts": [
+        ["Your C# service, 1 core", "307,126 calls/s, 13.9× ASP.NET Core"],
+        ["Your C# service, 4 cores", "973,914 calls/s, 4.0× ASP.NET Core"],
+        ["h2spec", "146 of 146"],
+        ["Release", "not yet"]
+      ],
+      "getLabel": "Source",
+      "get": ["github.com/AsmFoundation/GrpcAsm"],
+      "links": [
+        { "text": "Repository", "url": "https://github.com/AsmFoundation/GrpcAsm" },
+        { "text": "The roadmap", "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/docs/ROADMAP.md" }
+      ]
+    },
+    {
+      "name": "HttpAsm",
+      "status": "dev",
+      "stamp": "In development",
+      "date": "since 2026-11-23",
+      "summary": "HTTP/1.1, /2 and /3, written from the RFCs",
+      "features": [
+        "A server and a client on Linux x64, one epoll worker per core",
+        "A protocol core that does no I/O",
+        "HTTP/3 with its own QUIC and TLS, planned"
+      ],
+      "factsTitle": "Checked by",
+      "facts": [
+        ["h2spec", "146 of 146"],
+        ["Each RFC requirement", "a test that names it, or a deferral with a reason"],
+        ["Release", "not yet"]
+      ],
+      "getLabel": "Source",
+      "get": ["github.com/AsmFoundation/HttpAsm"],
+      "links": [
+        { "text": "Repository", "url": "https://github.com/AsmFoundation/HttpAsm" },
+        { "text": "The design", "url": "https://github.com/AsmFoundation/HttpAsm/blob/main/docs/DESIGN.md" }
+      ]
+    },
+    {
+      "name": "AsmClaudeMarketplace",
+      "status": "rel",
+      "stamp": "asmsdk plugin 0.3.0",
+      "date": "2026-11-21",
+      "summary": "Claude Code plugins that teach coding agents this ecosystem",
+      "features": [
+        "The asmsdk plugin: the SDK's rules and recipes",
+        "A project linter with 45 checks, judged per OS",
+        "A project scaffolder"
+      ],
+      "factsTitle": "Evaluated",
+      "facts": [
+        ["Projects built, with the plugin", "12 of 12"],
+        ["Projects built, without it", "4 of 12"],
+        ["Version evaluated", "plugin 0.1.0"]
+      ],
+      "getLabel": "Install, in Claude Code",
+      "get": [
+        "/plugin marketplace add AsmFoundation/AsmClaudeMarketplace",
+        "/plugin install asmsdk@asmfoundation"
+      ],
+      "links": [
+        { "text": "Repository", "url": "https://github.com/AsmFoundation/AsmClaudeMarketplace" }
+      ]
+    },
+    {
+      "name": "StorageAsm",
+      "status": "des",
+      "stamp": "In design",
+      "date": "since 2026-11-17",
+      "summary": "Blob and S3-style object storage over gRPC",
+      "features": [
+        "Its own NVMe engine",
+        "Quality of service that never chokes the device"
+      ],
+      "factsTitle": "Status",
+      "facts": [
+        ["Code", "not public yet"],
+        ["Release", "not yet"]
+      ],
+      "getLabel": "Source",
+      "get": ["not public yet"],
+      "links": []
+    }
+  ]
+}

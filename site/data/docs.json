@@ -1,0 +1,76 @@
+// The Docs page's table of contents: one book per project, each entry a real document. "kind" is a one-word
+// label (guide, reference, design, evidence, plan, policy). Check new links before adding them: the page
+// promises a table of contents, not a list of hopes.
+{
+  "books": [
+    {
+      "name": "AsmSdk",
+      "home": "asmfoundation.github.io/AsmSdk",
+      "url": "https://asmfoundation.github.io/AsmSdk/",
+      "entries": [
+        { "title": "Getting started: a library, a program and a C# caller", "url": "https://asmfoundation.github.io/AsmSdk/guide/getting-started.html", "kind": "guide" },
+        { "title": "Platforms and runtime identifiers", "url": "https://asmfoundation.github.io/AsmSdk/guide/platforms.html", "kind": "guide" },
+        { "title": "Calling assembly from .NET", "url": "https://asmfoundation.github.io/AsmSdk/guide/interop.html", "kind": "guide" },
+        { "title": "Programs: run, publish, pack as a tool", "url": "https://asmfoundation.github.io/AsmSdk/guide/programs.html", "kind": "guide" },
+        { "title": "References and packages", "url": "https://asmfoundation.github.io/AsmSdk/guide/references-and-packages.html", "kind": "guide" },
+        { "title": "The .asmproj reference", "url": "https://asmfoundation.github.io/AsmSdk/asmproj.html", "kind": "reference" },
+        { "title": "Examples: CRC-32C, WordCount, HexDump", "url": "https://asmfoundation.github.io/AsmSdk/examples/index.html", "kind": "examples" },
+        { "title": "C# and assembly, side by side", "url": "https://asmfoundation.github.io/AsmSdk/articles/csharp-and-assembly.html", "kind": "article" },
+        { "title": "Troubleshooting", "url": "https://asmfoundation.github.io/AsmSdk/guide/troubleshooting.html", "kind": "guide" }
+      ]
+    },
+    {
+      "name": "KvAsm",
+      "home": "github.com/AsmFoundation/KvAsm",
+      "url": "https://github.com/AsmFoundation/KvAsm",
+      "entries": [
+        { "title": "Run it and call it from .NET", "url": "https://github.com/AsmFoundation/KvAsm#quick-start", "kind": "guide" },
+        { "title": "The protocol: every call and every error", "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/PROTOCOL.md", "kind": "reference" },
+        { "title": "Operations: settings, memory, snapshots", "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/OPERATIONS.md", "kind": "reference" },
+        { "title": "Architecture", "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/ARCHITECTURE.md", "kind": "design" },
+        { "title": "Decision records 0001 to 0011", "url": "https://github.com/AsmFoundation/KvAsm/tree/main/docs/adr", "kind": "design" },
+        { "title": "Claims and their evidence", "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/CLAIMS.md", "kind": "evidence" },
+        { "title": "The case study: Measured, Not Argued", "url": "https://github.com/AsmFoundation/KvAsm/tree/main/docs/paper", "kind": "report" }
+      ]
+    },
+    {
+      "name": "GrpcAsm",
+      "home": "github.com/AsmFoundation/GrpcAsm",
+      "url": "https://github.com/AsmFoundation/GrpcAsm",
+      "entries": [
+        { "title": "Your C# gRPC service, on an engine in assembly", "url": "https://github.com/AsmFoundation/GrpcAsm#your-c-grpc-service-on-an-engine-in-assembly", "kind": "guide" },
+        { "title": "The roadmap: every decision and milestone", "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/docs/ROADMAP.md", "kind": "plan" },
+        { "title": "Against ASP.NET Core gRPC, on one core and four", "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/benchmarks/endtoend/2026-11-20-aspnet/README.md", "kind": "evidence" }
+      ]
+    },
+    {
+      "name": "HttpAsm",
+      "home": "github.com/AsmFoundation/HttpAsm",
+      "url": "https://github.com/AsmFoundation/HttpAsm",
+      "entries": [
+        { "title": "The design: decisions, architecture, milestones", "url": "https://github.com/AsmFoundation/HttpAsm/blob/main/docs/DESIGN.md", "kind": "plan" },
+        { "title": "The requirements, extracted from the RFCs", "url": "https://github.com/AsmFoundation/HttpAsm/blob/main/specs/requirements.tsv", "kind": "reference" },
+        { "title": "The measurements", "url": "https://github.com/AsmFoundation/HttpAsm/blob/main/benchmarks/README.md", "kind": "evidence" }
+      ]
+    },
+    {
+      "name": "AsmClaudeMarketplace",
+      "home": "github.com/AsmFoundation/AsmClaudeMarketplace",
+      "url": "https://github.com/AsmFoundation/AsmClaudeMarketplace",
+      "entries": [
+        { "title": "Install the marketplace and its plugins", "url": "https://github.com/AsmFoundation/AsmClaudeMarketplace#readme", "kind": "guide" },
+        { "title": "The plugins planned next", "url": "https://github.com/AsmFoundation/AsmClaudeMarketplace/blob/main/ROADMAP.md", "kind": "plan" }
+      ]
+    },
+    {
+      "name": "The foundation",
+      "home": "github.com/AsmFoundation/.github",
+      "url": "https://github.com/AsmFoundation/.github",
+      "entries": [
+        { "title": "Get started", "url": "{{root}}get-started/", "kind": "guide" },
+        { "title": "Contributing", "url": "https://github.com/AsmFoundation/.github/blob/main/CONTRIBUTING.md", "kind": "guide" },
+        { "title": "Security policy", "url": "https://github.com/AsmFoundation/.github/blob/main/SECURITY.md", "kind": "policy" }
+      ]
+    }
+  ]
+}

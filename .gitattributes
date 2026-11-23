@@ -1,0 +1,4 @@
+# text is stored with LF line endings whatever the editor's platform
+* text=auto eol=lf
+# fonts are binary
+*.woff2 binary

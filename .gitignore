@@ -1,0 +1,5 @@
+# the built website: CI builds and publishes it, nothing commits it
+_site/
+# .NET build output, should a project ever live here
+bin/
+obj/

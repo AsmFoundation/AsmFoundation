@@ -1,0 +1,86 @@
+// The Evidence page's charts, in the order shown: two per row, one core on the left, more cores on the right.
+// Each row of a chart: label, value (in the chart's unit, 0..max), the text shown for it, "ours" for our
+// bar, "show" to print a rival's value on its bar too. Every number is copied from the source it names.
+{
+  "charts": [
+    {
+      "title": "Reads on one core",
+      "question": "KvAsm's GET/s on one core, 1M keys, 100-byte values; more is better",
+      "max": 2,
+      "rows": [
+        { "label": "KvAsm", "value": 1.76, "text": "1.76M", "ours": true },
+        { "label": "Valkey", "value": 1.42, "text": "1.42M", "show": true },
+        { "label": "Redis", "value": 1.40, "text": "1.40M" }
+      ],
+      "ticks": [[0, "0"], [0.5, "0.5M"], [1, "1M"], [1.5, "1.5M"], [2, "2M"]],
+      "source": "KvAsm claims ledger, claim 3: 2026-09-27, six of six paired blocks",
+      "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/CLAIMS.md"
+    },
+    {
+      "title": "Reads on four cores",
+      "question": "KvAsm's GET/s on four cores, same workload; more is better",
+      "max": 10,
+      "rows": [
+        { "label": "KvAsm", "value": 8.84, "text": "8.84M", "ours": true },
+        { "label": "Garnet", "value": 3.86, "text": "3.86M", "show": true },
+        { "label": "Valkey", "value": 3.20, "text": "3.20M" },
+        { "label": "Memcached", "value": 3.01, "text": "3.01M" },
+        { "label": "Redis", "value": 2.88, "text": "2.88M" },
+        { "label": "Dragonfly", "value": 2.40, "text": "2.40M" }
+      ],
+      "ticks": [[0, "0"], [2, "2M"], [4, "4M"], [6, "6M"], [8, "8M"], [10, "10M"]],
+      "source": "KvAsm claims ledger, claim 3: 2026-09-27, ten of ten paired blocks",
+      "url": "https://github.com/AsmFoundation/KvAsm/blob/main/docs/CLAIMS.md"
+    },
+    {
+      "title": "Your C# gRPC service on one core",
+      "question": "Calls/s of the same C# service class taking a 989-byte order; more is better",
+      "max": 350000,
+      "rows": [
+        { "label": "GrpcAsm", "value": 307126, "text": "307,126", "ours": true },
+        { "label": "ASP.NET Core", "value": 21911, "text": "21,911", "show": true }
+      ],
+      "ticks": [[0, "0"], [100000, "100k"], [200000, "200k"], [300000, "300k"]],
+      "note": "One core is ASP.NET Core's least favorable shape: it costs 2.7 to 2.9 times less per call on four, so the four-core chart is the fairer headline.",
+      "source": "GrpcAsm, 2026-11-20: 12 paired rounds, both servers saturated",
+      "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/benchmarks/endtoend/2026-11-20-aspnet/README.md"
+    },
+    {
+      "title": "Your C# gRPC service on four cores",
+      "question": "Calls/s of the same C# service class taking a 989-byte order; more is better",
+      "max": 1000000,
+      "rows": [
+        { "label": "GrpcAsm", "value": 973914, "text": "973,914", "ours": true },
+        { "label": "ASP.NET Core", "value": 249200, "text": "249,200", "show": true }
+      ],
+      "ticks": [[0, "0"], [250000, "250k"], [500000, "500k"], [750000, "750k"], [1000000, "1M"]],
+      "source": "GrpcAsm, 2026-11-20: 12 paired rounds, both servers saturated",
+      "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/benchmarks/endtoend/2026-11-20-aspnet/README.md"
+    },
+    {
+      "title": "CRC-32C of 1 MiB, one core",
+      "question": "GB/s, called from C#; more is better",
+      "max": 25,
+      "rows": [
+        { "label": "Assembly", "value": 21.8, "text": "21.8 GB/s", "ours": true },
+        { "label": "C# loop", "value": 5.90, "text": "5.90 GB/s", "show": true }
+      ],
+      "ticks": [[0, "0"], [5, "5"], [10, "10"], [15, "15"], [20, "20"], [25, "25 GB/s"]],
+      "source": "AsmSdk Crc32C sample, i9-13900K, median of three runs",
+      "url": "https://asmfoundation.github.io/AsmSdk/examples/testing-and-benchmarks.html"
+    },
+    {
+      "title": "CRC-32C of 64 bytes, one core",
+      "question": "Nanoseconds per call; less is better. Here C# wins: calling native code costs as much as the checksum",
+      "max": 15,
+      "rows": [
+        { "label": "Assembly", "value": 13.0, "text": "13.0 ns", "ours": true },
+        { "label": "C# loop", "value": 3.35, "text": "3.35 ns", "show": true }
+      ],
+      "ticks": [[0, "0"], [5, "5"], [10, "10"], [15, "15 ns"]],
+      "note": "From 256 bytes on the assembly wins: 1.16× at 256 bytes, 3.1× at 1 KiB.",
+      "source": "AsmSdk Crc32C sample, same run",
+      "url": "https://asmfoundation.github.io/AsmSdk/examples/testing-and-benchmarks.html"
+    }
+  ]
+}

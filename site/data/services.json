@@ -1,0 +1,31 @@
+// The Map page's drawing. "services" are the sixteen services of the organization's banner, in its order;
+// the first eight sit on the floor above the protocols. A status is rel (released), dev (in development),
+// des (in design) or none (not started, the default). Update "updated" whenever a room changes.
+{
+  "updated": "2026-11-23",
+  "summary": "Section drawing of the foundation: machine code at the bottom, AsmSdk above it, HttpAsm and GrpcAsm above that, and sixteen service rooms on top, of which Cache is released and Storage is in design.",
+  "foundation": "The foundation: x86-64 and ARM64 machine code",
+  "services": [
+    { "name": "Compute" },
+    { "name": "Containers" },
+    { "name": "Functions" },
+    { "name": "Storage", "status": "des", "project": "StorageAsm", "text": "In design: blob and S3-style object storage over gRPC, on its own NVMe engine." },
+    { "name": "Database" },
+    { "name": "Network" },
+    { "name": "Cache", "status": "rel", "project": "KvAsm 0.3.0", "text": "Released: a gRPC key-value server, 1.76M GET/s on 1 core and 8.84M on 4." },
+    { "name": "DNS" },
+    { "name": "Queue" },
+    { "name": "Gateway" },
+    { "name": "Registry" },
+    { "name": "Load balancer" },
+    { "name": "Identity" },
+    { "name": "Secrets" },
+    { "name": "Monitor" },
+    { "name": "CDN" }
+  ],
+  "protocols": [
+    { "name": "HttpAsm", "status": "dev", "sub": "HTTP/1.1, /2 and /3, QUIC and TLS. In development.", "text": "In development: HTTP/1.1, /2 and /3, with QUIC and TLS of its own, as client and server." },
+    { "name": "GrpcAsm", "status": "dev", "sub": "gRPC server and client. In development.", "text": "In development: a gRPC server and client with NASM, C and .NET APIs." }
+  ],
+  "build": { "name": "AsmSdk", "status": "rel", "sub": "Builds, tests and packages every project for seven platforms. Released 0.3.0.", "text": "Released 0.3.0: builds, tests and packages assembly for seven platforms with dotnet build." }
+}

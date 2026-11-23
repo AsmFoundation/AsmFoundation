@@ -1,0 +1,45 @@
+<!--
+title: Home
+title-full: AsmFoundation: Free Open Source Assembly Software
+description: The services clouds run on, hand-written in x86-64 assembly and given away under Apache-2.0, with every speed claim linked to the run that measured it.
+path:
+body: home
+scripts: opcodes.js seal.js home.js
+-->
+<script>
+  // This visit's seal animation, picked before the table renders so a lifted table never flashes.
+  // The owner's rule: one of the three animations, a different one on every load (the static seal only for
+  // reduced motion). The last one is kept in localStorage; where storage is blocked, a random pick stands in.
+  (function () {
+    var all = ["swirl", "print", "orbit"], pick = "static";
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      try { pick = all[(all.indexOf(localStorage.getItem("asmf-seal")) + 1) % all.length]; localStorage.setItem("asmf-seal", pick); }
+      catch (e) { pick = all[Math.floor(Math.random() * all.length)]; }
+    }
+    document.documentElement.setAttribute("data-seal", pick);
+  })();
+</script>
+<section class="wrap hero">
+  <div>
+    <h1>Free Open Source Assembly Software</h1>
+    <p class="lede">We build the services clouds run on, key-value stores, RPC, HTTP and storage, by hand in x86-64 assembly, and give every line away under Apache-2.0. Each speed claim links to the run that measured it.</p>
+    <div class="cta"><a class="btn primary" href="{{root}}projects/">See the projects</a><a class="btn quiet" href="{{root}}evidence/">Read the evidence</a></div>
+    <p class="note">The seal is made of the x86-64 instruction set's first page: all <b id="count">1,854</b> letters of its 256 one-byte opcodes. The ring spells our name in the table's own letters; the A is the rest of the table, in order. Press <b>Read the table</b> to put every letter back and explore the instructions.</p>
+  </div>
+  <div class="op-wrap">
+    <div class="op-head"><span class="t" id="cap">The same letters, assembled</span>
+      <span class="tools"><button type="button" id="replay">Replay</button><button type="button" id="mode">Read the table</button></span></div>
+    <div class="stage" id="stage"><table class="op" id="op" aria-label="The x86-64 one-byte opcode map; use the arrow keys to move between instructions"></table></div>
+    <div class="readout" id="readout" aria-live="polite"><div class="hex">A</div><div class="what"><strong>1,854 letters, one seal</strong>The ring spells our name; the A is the rest of the table, read left to right.<span class="use">Read the table to send every letter back to its instruction.</span></div></div>
+  </div>
+</section>
+
+<section class="s fosas" id="fosas"><div class="wrap">
+  <h2>Five words, five promises</h2>
+  <p class="intro">What we commit to when we call our work FOSAS.</p>
+  <div class="line"><span class="word"><span class="blk m">F</span>ree</span><p>Apache-2.0 for every project. Use it, change it, sell it.<small>The SDK, the clients and the tooling included.</small></p></div>
+  <div class="line"><span class="word"><span class="blk m">O</span>pen</span><p>Every line, every benchmark run and every claim is public.<small>Each claims ledger also lists what we deliberately do not claim.</small></p></div>
+  <div class="line"><span class="word"><span class="blk t">S</span>ource</span><p>Readable NASM whose comments explain why, not only what.<small>Every repository builds from a clean clone in CI.</small></p></div>
+  <div class="line"><span class="word"><span class="blk t">A</span>ssembly</span><p>Hand-written x86-64, with SIMD and AES-NI where measurement says they pay.<small>KvAsm's key hash is ten AES rounds; its tag match is one SSE2 compare.</small></p></div>
+  <div class="line"><span class="word"><span class="blk t">S</span>oftware</span><p>Shipped the way your stack expects.<small>Container images, NuGet packages and .NET clients, with changelogs and CI.</small></p></div>
+</div></section>

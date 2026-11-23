@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:site_name" content="AsmFoundation">
+<meta name="theme-color" content="#ffffff">
+{{canonical}}
+<link rel="icon" href="{{root}}assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="{{root}}assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}assets/site.css">
+</head>
+<body class="{{body}}">
+<a class="skip" href="#main">Skip to content</a>
+<header class="wrap nav">
+  <a class="brand" href="{{root}}"><svg class="logo-a" viewBox="236 204 782 746" width="29" height="28" aria-hidden="true"><rect class="m" x="559" y="214" width="135" height="135"/><rect class="m" x="414" y="372" width="129" height="125"/><rect class="m" x="559" y="372" width="135" height="125"/><rect class="m" x="712" y="372" width="127" height="125"/><rect class="t" x="349" y="524" width="138" height="121"/><rect class="t" x="766" y="524" width="138" height="121"/><rect class="t" x="288" y="665" width="139" height="124"/><rect class="t" x="451" y="665" width="351" height="121"/><rect class="t" x="826" y="665" width="139" height="124"/><rect class="t" x="246" y="811" width="156" height="129"/><rect class="t" x="850" y="811" width="158" height="129"/></svg>AsmFoundation</a>
+  <nav class="links" aria-label="Site">{{nav}}</nav>
+</header>
+<main id="main">
+{{content}}
+</main>
+<footer><div class="wrap row">
+  <div><b>AsmFoundation</b>Free Open Source Assembly Software.<br><a href="https://github.com/AsmFoundation">github.com/AsmFoundation</a></div>
+  <div><b>Licence</b>Every project is Apache-2.0.</div>
+  <div><b>Security</b>Report vulnerabilities privately, through a repository's Security tab.</div>
+  <div><b>Contribute</b>Issues and pull requests are welcome. A speed change needs a paired measurement.</div>
+</div></footer>
+<script src="{{root}}assets/site.js"></script>
+{{scripts}}
+</body>
+</html>

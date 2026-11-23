@@ -1,0 +1,71 @@
+# Builds the website and publishes it to AsmFoundation/asmfoundation.github.io, the repository GitHub serves at
+# https://asmfoundation.github.io/ (an organization's root site must come from a repository with that name).
+# The build runs on every push to main, by hand, and nightly: the About log reads every repository's history,
+# so it must refresh even when this repository is quiet.
+name: site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: read
+
+# one publish at a time, in order: a newer build must never be overwritten by an older one finishing later
+concurrency:
+  group: site
+  cancel-in-progress: false
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        env:
+          # raises the GitHub API's rate limit for the commit history; the job's own token suffices for public data
+          ASMF_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet run site/build.cs -- --out "$RUNNER_TEMP/site"
+
+      - name: Publish
+        # only main publishes; a build from a branch (workflow_dispatch) only proves the site still builds
+        if: github.ref == 'refs/heads/main'
+        env:
+          # the private half of a deploy key that has write access to asmfoundation.github.io and nothing else
+          DEPLOY_KEY: ${{ secrets.PAGES_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_KEY" ]; then echo "::error::The PAGES_DEPLOY_KEY secret is not set"; exit 1; fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/pages_key && chmod 600 ~/.ssh/pages_key
+          # GitHub's SSH host keys, read over HTTPS from its API rather than trusted on first use
+          curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .' > ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/pages_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          git clone --depth 1 git@github.com:AsmFoundation/asmfoundation.github.io.git "$RUNNER_TEMP/pages"
+          cd "$RUNNER_TEMP/pages"
+          # the target holds only generated files: replace everything except its history
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$RUNNER_TEMP/site/." .
+          cat > README.md <<'EOF'
+          # asmfoundation.github.io
+
+          Generated. This repository holds the built website that GitHub Pages serves at
+          https://asmfoundation.github.io/. Edit its source in
+          [AsmFoundation/AsmFoundation](https://github.com/AsmFoundation/AsmFoundation): every push there,
+          and a nightly run, rebuilds the site and replaces everything here.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "The site did not change."; exit 0; fi
+          git commit -q -m "Site from AsmFoundation/AsmFoundation@${GITHUB_SHA::7}" \
+                        -m "Built by $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          git push origin HEAD:main
