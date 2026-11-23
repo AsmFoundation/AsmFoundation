@@ -1,6 +1,9 @@
 // The Architecture page's drawing. "services" are the sixteen services of the organization's banner, in its order;
 // the first eight sit on the floor above the protocols. A status is rel (released), dev (in development),
 // des (in design) or none (not started, the default). Update "updated" whenever a room changes.
+// The same drawing also appears on the GitHub organization page (AsmFoundation/.github, profile/README.md): the build
+// writes it to architecture/drawing.svg as well, and that page shows the file from the website. One change here
+// updates both, after the next build.
 {
   "updated": "2026-11-23",
   "summary": "Section drawing of the foundation: machine code at the bottom, AsmSdk above it, HttpAsm and GrpcAsm above that, and sixteen service rooms on top, of which Cache is released and Storage is in design.",

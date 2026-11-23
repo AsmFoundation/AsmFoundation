@@ -51,7 +51,7 @@ in a shell must not break a build.
 |---|---|
 | A figure on a datasheet | `site/data/projects.json` |
 | A chart on the Benchmarks page | `site/data/benchmarks.json` |
-| A room on the Architecture page | `site/data/architecture.json` |
+| A room on the Architecture page | `site/data/architecture.json`. The build also writes the drawing to `architecture/drawing.svg`, which the [GitHub organization page](https://github.com/AsmFoundation) shows above its project table: one change updates both |
 | The Docs table of contents | `site/data/docs.json` |
 | A milestone in the About log | `site/data/milestones.json` |
 | A section of Get started | `site/get-started/*.md`, one file per section |

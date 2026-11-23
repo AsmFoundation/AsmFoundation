@@ -148,6 +148,8 @@ static class Site
         }
         files["sitemap.xml"] = Sitemap(files.Keys);
         files[".nojekyll"] = "";   // GitHub Pages serves the files as they are, without running Jekyll
+        // the Architecture drawing as an image of its own: the GitHub organization page embeds it from this address
+        files["architecture/drawing.svg"] = parts.ArchitectureDrawing();
 
         if (Directory.Exists(o.OutputDirectory)) Directory.Delete(o.OutputDirectory, recursive: true);
         foreach (var (rel, content) in files)
@@ -571,13 +573,36 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
 
     // ------------------------------------------------------------------------------------------ Architecture
 
-    /// <summary>The Architecture page: the foundation drawn as a building section, from data/architecture.json. The services are
-    /// the rooms on top, eight to a floor; the protocols, the build and the machine code are the floors beneath.</summary>
-    /// <returns>The key, the drawing, its readout and its date.</returns>
-    /// <exception cref="BuildException">The file lacks a field or uses an unknown status.</exception>
-    /// <remarks>Each room is focusable and carries its description in <c>data-d</c> ("Name: text"); site.js shows it in
-    /// the readout on hover and focus. The drawing grows a floor for every eight services.</remarks>
-    string Architecture()
+    /// <summary>The Architecture page: the drawing (<see cref="ArchitectureSvg"/>), the key of status colours, a readout
+    /// that names the room under the pointer, and the date the drawing describes.</summary>
+    /// <returns>The page part's HTML.</returns>
+    /// <exception cref="BuildException">data/architecture.json lacks a field or uses an unknown status.</exception>
+    string Architecture() =>
+        Key() + $"<div class=\"elev-wrap\">{ArchitectureSvg(standalone: false)}</div>" +
+        "<div class=\"readout2\" id=\"ro\" aria-live=\"polite\"><b>Point at a room</b><span>Each one says what is there today.</span></div>" +
+        $"<p class=\"drawn\">Drawn on {H.E(data["architecture"].Str("updated", "architecture.json"))}. A dashed outline marks a service nobody has started.</p>";
+
+    /// <summary>The same drawing as a file of its own, which the build writes to <c>architecture/drawing.svg</c>. The GitHub
+    /// organization page (AsmFoundation/.github, <c>profile/README.md</c>) shows that file above its project table, so the
+    /// page and the website draw from one source: data/architecture.json.</summary>
+    /// <returns>A complete SVG document: its font embedded, its own key, on a white card.</returns>
+    /// <exception cref="BuildException">data/architecture.json lacks a field or uses an unknown status, or the Archivo font
+    /// file is missing from site/assets/fonts.</exception>
+    /// <remarks>GitHub shows an SVG as an image, and an image cannot load fonts or pages' styles: hence the embedded font
+    /// and the key drawn inside. The white card keeps the ink lines legible on GitHub's dark theme.</remarks>
+    public string ArchitectureDrawing() => ArchitectureSvg(standalone: true);
+
+    /// <summary>The foundation drawn as a building section, from data/architecture.json. The services are the rooms on top,
+    /// eight to a floor; the protocols, the build and the machine code are the floors beneath.</summary>
+    /// <param name="standalone">False for the website's page: the drawing sits in the page's HTML, uses the page's fonts, and
+    /// each room is focusable with its description in <c>data-d</c> ("Name: text"), which site.js shows in the readout.
+    /// True for <see cref="ArchitectureDrawing"/>: a self-contained document for use as an image elsewhere.</param>
+    /// <returns>The drawing's SVG markup.</returns>
+    /// <exception cref="BuildException">The data file lacks a field or uses an unknown status, or (standalone) the Archivo
+    /// font file is missing.</exception>
+    /// <remarks>The drawing grows a floor for every eight services. Both forms come from this one method on purpose: a
+    /// change to the data changes the website and the GitHub page alike.</remarks>
+    string ArchitectureSvg(bool standalone)
     {
         const double x0 = 178, x1 = 1200, roomH = 90, levelH = 92, slabH = 62, top = 10;
         const int perFloor = 8;
@@ -590,10 +615,36 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         var ground = buildY + levelH;
         var height = ground + slabH + 34;
         var mid = (x0 + x1) / 2;
-        var svg = new StringBuilder($"<svg class=\"elev\" viewBox=\"0 0 1210 {H.N(height)}\" role=\"img\" aria-label=\"{H.E(m.Str("summary", where))}\">")
-            .Append("<defs><pattern id=\"hatch\" width=\"9\" height=\"9\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"9\" stroke=\"#062f2e\" stroke-width=\"1.3\" opacity=\".55\"/></pattern>")
-            .Append("<pattern id=\"earth\" width=\"14\" height=\"14\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(-45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"14\" stroke=\"#b9c2c7\" stroke-width=\"1\"/></pattern></defs>")
-            .Append("<g font-family=\"Archivo, sans-serif\">");
+        var svg = new StringBuilder();
+        if (standalone)
+        {
+            // a margin for the card and, above the drawing, a band for the key
+            const double pad = 24, keyBand = 40;
+            var font = Path.Combine(o.SiteDirectory, "assets", "fonts", "archivo-latin.woff2");
+            if (!File.Exists(font)) throw new BuildException($"{font} is missing: the standalone drawing embeds it.");
+            svg.Append($"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"{H.N(-pad)} {H.N(-pad - keyBand)} {H.N(1210 + 2 * pad)} {H.N(height + 2 * pad + keyBand)}\" width=\"{H.N(1210 + 2 * pad)}\" height=\"{H.N(height + 2 * pad + keyBand)}\" role=\"img\" aria-labelledby=\"t\">")
+               .Append($"<title id=\"t\">{H.E(m.Str("summary", where))}</title>")
+               .Append($"<style>@font-face{{font-family:\"Archivo\";src:url(data:font/woff2;base64,{Convert.ToBase64String(File.ReadAllBytes(font))}) format(\"woff2\");font-weight:100 900;font-stretch:62% 125%}}</style>")
+               .Append($"<rect x=\"{H.N(-pad)}\" y=\"{H.N(-pad - keyBand)}\" width=\"{H.N(1210 + 2 * pad)}\" height=\"{H.N(height + 2 * pad + keyBand)}\" rx=\"24\" fill=\"#fff\"/>");
+        }
+        else
+        {
+            svg.Append($"<svg class=\"elev\" viewBox=\"0 0 1210 {H.N(height)}\" role=\"img\" aria-label=\"{H.E(m.Str("summary", where))}\">");
+        }
+        svg.Append("<defs><pattern id=\"hatch\" width=\"9\" height=\"9\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"9\" stroke=\"#062f2e\" stroke-width=\"1.3\" opacity=\".55\"/></pattern>")
+           .Append("<pattern id=\"earth\" width=\"14\" height=\"14\" patternUnits=\"userSpaceOnUse\" patternTransform=\"rotate(-45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"14\" stroke=\"#b9c2c7\" stroke-width=\"1\"/></pattern></defs>")
+           .Append("<g font-family=\"Archivo, sans-serif\">");
+        if (standalone)
+        {
+            // the key the page shows in HTML, drawn into the image: an image cannot show the page around it
+            var keys = new[] { ("Released", "fill=\"#062f2e\""), ("In development", "fill=\"#06706d\""), ("In design", "fill=\"#d99a3c\""), ("Not started", "fill=\"#fff\" stroke=\"#c3cbd0\" stroke-dasharray=\"3 2\"") };
+            var kx = 0.0;
+            foreach (var (label, paint) in keys)
+            {
+                svg.Append($"<rect x=\"{H.N(kx)}\" y=\"-28\" width=\"24\" height=\"8\" {paint}/><text x=\"{H.N(kx + 32)}\" y=\"-19\" font-size=\"14\" fill=\"#5b656b\">{label}</text>");
+                kx += 32 + label.Length * 7.6 + 26;   // Archivo at 14 px averages under 7.6 px a character
+            }
+        }
         var width = (x1 - x0) / perFloor;
         for (var i = 0; i < services.Count; i++)
         {
@@ -604,7 +655,7 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
             var status = Status(s.OptStr("status") ?? "none", $"{where}: {name}", "rel", "dev", "des", "none");
             var project = s.OptStr("project");
             var desc = status == "none" ? $"{name}: not started." : $"{name}: {project}. {s.Str("text", $"{where}: {name}")}";
-            svg.Append(Room(x0 + (i % perFloor) * width, top + floor * roomH, width, roomH, name, status, project ?? "", false, desc));
+            svg.Append(Room(x0 + (i % perFloor) * width, top + floor * roomH, width, roomH, name, status, project ?? "", false, desc, !standalone));
         }
         var protocols = m.Arr("protocols", where).ToList();
         var pw = (x1 - x0) / Math.Max(1, protocols.Count);
@@ -612,11 +663,11 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         {
             var p = protocols[i];
             var name = p.Str("name", where);
-            svg.Append(Room(x0 + i * pw, protoY, pw, levelH, name, Status(p.Str("status", where), $"{where}: {name}", "rel", "dev", "des"), p.Str("sub", where), true, $"{name}: {p.Str("text", where)}"));
+            svg.Append(Room(x0 + i * pw, protoY, pw, levelH, name, Status(p.Str("status", where), $"{where}: {name}", "rel", "dev", "des"), p.Str("sub", where), true, $"{name}: {p.Str("text", where)}", !standalone));
         }
         if (!m.TryGetProperty("build", out var b)) throw new BuildException($"{where}: \"build\" must be an object.");
         var buildName = b.Str("name", where);
-        svg.Append(Room(x0, buildY, x1 - x0, levelH, buildName, Status(b.Str("status", where), $"{where}: {buildName}", "rel", "dev", "des"), b.Str("sub", where), true, $"{buildName}: {b.Str("text", where)}"));
+        svg.Append(Room(x0, buildY, x1 - x0, levelH, buildName, Status(b.Str("status", where), $"{where}: {buildName}", "rel", "dev", "des"), b.Str("sub", where), true, $"{buildName}: {b.Str("text", where)}", !standalone));
         svg.Append($"<rect x=\"0\" y=\"{H.N(ground)}\" width=\"1210\" height=\"{H.N(slabH + 34)}\" fill=\"url(#earth)\"/><line x1=\"0\" y1=\"{H.N(ground)}\" x2=\"1210\" y2=\"{H.N(ground)}\" stroke=\"#062f2e\" stroke-width=\"2\"/>")
            .Append($"<rect x=\"{H.N(x0 - 14)}\" y=\"{H.N(ground)}\" width=\"{H.N(x1 - x0 + 28)}\" height=\"{H.N(slabH)}\" fill=\"#fff\"/>")
            .Append($"<rect x=\"{H.N(x0 - 14)}\" y=\"{H.N(ground)}\" width=\"{H.N(x1 - x0 + 28)}\" height=\"{H.N(slabH)}\" fill=\"url(#hatch)\" stroke=\"#062f2e\" stroke-width=\"2\"/>")
@@ -626,10 +677,7 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         foreach (var (label, y0, y1) in new[] { ("Services", top, protoY), ("Protocols", protoY, buildY), ("Build", buildY, ground), ("Foundation", ground, ground + slabH) })
             svg.Append($"<text x=\"0\" y=\"{H.N((y0 + y1) / 2 + 5)}\" font-size=\"14\" font-weight=\"700\" fill=\"#062f2e\">{label}</text>")
                .Append($"<path d=\"M{H.N(x0 - 40)} {H.N(y0 + 4)} h10 V{H.N(y1 - 4)} h-10\" fill=\"none\" stroke=\"#b9c2c7\" stroke-width=\"1.5\"/>");
-        svg.Append("</g></svg>");
-        return Key() + $"<div class=\"elev-wrap\">{svg}</div>" +
-               "<div class=\"readout2\" id=\"ro\" aria-live=\"polite\"><b>Point at a room</b><span>Each one says what is there today.</span></div>" +
-               $"<p class=\"drawn\">Drawn on {H.E(m.Str("updated", where))}. A dashed outline marks a service nobody has started.</p>";
+        return svg.Append("</g></svg>").ToString();
     }
 
     /// <summary>One room of the Architecture page's drawing; its status sets the outline, a small mint block marks a released room.</summary>
@@ -642,8 +690,10 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
     /// <param name="sub">A second line under the name, or empty.</param>
     /// <param name="big">True for the wide floors (protocols, build): a larger, expanded name.</param>
     /// <param name="desc">The readout text, "Name: what is there".</param>
+    /// <param name="interactive">True on the website's page: the room takes focus and carries <paramref name="desc"/> for the
+    /// readout. False in the standalone drawing, which is shown as an image and cannot take focus.</param>
     /// <returns>The room's SVG group.</returns>
-    static string Room(double x, double y, double w, double h, string name, string status, string sub, bool big, string desc)
+    static string Room(double x, double y, double w, double h, string name, string status, string sub, bool big, string desc, bool interactive)
     {
         var stroke = status switch
         {
@@ -655,7 +705,8 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
         var color = status == "none" ? "#8f9aa0" : "#062f2e";
         var (size, weight) = big ? (22.0, 800) : (14.5, status == "none" ? 600 : 700);
         var cx = x + w / 2;
-        var sb = new StringBuilder($"<g class=\"room\" tabindex=\"0\" data-d=\"{H.E(desc)}\"><rect x=\"{H.N(x + 1.5)}\" y=\"{H.N(y + 1.5)}\" width=\"{H.N(w - 3)}\" height=\"{H.N(h - 3)}\" fill=\"#fff\" {stroke}/>");
+        var focus = interactive ? $" class=\"room\" tabindex=\"0\" data-d=\"{H.E(desc)}\"" : "";
+        var sb = new StringBuilder($"<g{focus}><rect x=\"{H.N(x + 1.5)}\" y=\"{H.N(y + 1.5)}\" width=\"{H.N(w - 3)}\" height=\"{H.N(h - 3)}\" fill=\"#fff\" {stroke}/>");
         if (status == "rel") sb.Append($"<rect x=\"{H.N(x + 10)}\" y=\"{H.N(y + 10)}\" width=\"11\" height=\"11\" fill=\"#3eea8c\"/>");
         sb.Append($"<text x=\"{H.N(cx)}\" y=\"{H.N(y + h / 2 + (sub.Length > 0 ? -6 : 5))}\" text-anchor=\"middle\" font-size=\"{H.N(size)}\" font-weight=\"{weight}\" fill=\"{color}\" style=\"font-stretch:{(big ? "116%" : "100%")}\">{H.E(name)}</text>");
         if (sub.Length > 0)
