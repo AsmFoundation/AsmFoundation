@@ -2,3 +2,5 @@
 * text=auto eol=lf
 # fonts are binary
 *.woff2 binary
+# highlight.js is a vendored, minified build: not this repository's code in GitHub's language statistics
+site/highlight/vendor/** linguist-vendored

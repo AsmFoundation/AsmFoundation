@@ -6,16 +6,16 @@ The asmsdk plugin gives Claude Code the SDK's rules and recipes, a linter for `.
 
 ### Add the marketplace
 
-```sh
-$ /plugin marketplace add AsmFoundation/AsmClaudeMarketplace
+```claude
+/plugin marketplace add AsmFoundation/AsmClaudeMarketplace
 ```
 
 Type it in Claude Code. The marketplace is called `asmfoundation`; it holds one plugin per topic.
 
 ### Install the plugin
 
-```sh
-$ /plugin install asmsdk@asmfoundation
+```claude
+/plugin install asmsdk@asmfoundation
 ```
 
 The plugin follows AsmSdk's releases: plugin 0.3.0 teaches SDK 0.3.0.

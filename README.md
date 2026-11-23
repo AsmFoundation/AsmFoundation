@@ -58,6 +58,7 @@ in a shell must not break a build.
 | A page's text | `site/pages/*.html` |
 | The shell around every page | `site/layout.html` |
 | Styles and scripts | `site/assets/` |
+| How code is colored | `site/highlight/` (the grammars) and the token colors in `site/assets/site.css` |
 
 The generator, `site/build.cs`, documents every format it reads. Its rules, which a build enforces:
 
@@ -68,6 +69,11 @@ The generator, `site/build.cs`, documents every format it reads. Its rules, whic
   Each `### Step` starts a step: its code goes on the left, everything else becomes the note on the right.
   In code, `$ ` marks a command, and a block marked `output` is output. The menu at the top right is built
   from the sections and steps, so adding a file is all a new section needs.
+- **All code is colored**, at build time, in the language its block names: a highlight.js language (`sh`,
+  `csharp`, `json`, `xml` ...) or the foundation's `nasm`, `cli` and `claude`
+  ([site/highlight](site/highlight/README.md)). Only `text` (prose) and `output` stay plain. A block with
+  no language, or with one no grammar knows, stops the build. A datasheet's install lines are colored in its
+  `getLanguage`.
 - **A milestone** that names a repository and a commit replaces that commit's row in the log; the build
   fails when no commit matches, so a typo cannot drop one silently.
 

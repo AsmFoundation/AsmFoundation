@@ -5,6 +5,7 @@
 #:property PublishAot=false
 #:property InvariantGlobalization=true
 #:package Markdig@1.6.0
+#:package Jint@4.18.1
 
 // The AsmFoundation website generator: renders site/ into a folder of static files for GitHub Pages.
 //
@@ -19,6 +20,8 @@
 //                      <!-- @part --> marker in its body is replaced by a generated part (see Parts).
 //   data/*.json        the facts the generated parts are drawn from: one place to change a figure.
 //   get-started/*.md   one section of the Get started page each, in file-name order (see Parts.GetStarted).
+//   highlight/         highlight.js and the foundation's own grammars, run at build time to color every code
+//                      block (see Highlighter); nothing in it is published.
 //   assets/            copied as is.
 // The About log also lists every commit and tag of the organization's public repositories, read from
 // the GitHub API at build time. ASMF_GITHUB_TOKEN, when set, raises the API's rate limit; CI passes its
@@ -29,6 +32,9 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Jint;
+using Jint.Native;
+using Jint.Runtime;
 using Markdig;
 using Markdig.Extensions.Yaml;
 using Markdig.Renderers;
@@ -417,6 +423,9 @@ static class J
 /// <param name="history">The organization's commit history, or null when building offline.</param>
 sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
 {
+    /// <summary>Colors code; created on first use, so a page without code never starts the JavaScript engine.</summary>
+    readonly Lazy<Highlighter> highlighter = new(() => new Highlighter(Path.Combine(o.SiteDirectory, "highlight")));
+
     /// <summary>A project's, service's or room's state, as the data files spell it, and its words.</summary>
     static readonly Dictionary<string, string> Statuses = new(StringComparer.Ordinal)
     {
@@ -481,7 +490,10 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
                 sb.Append($"<tr><td>{H.E(cells[0])}</td><td>{H.E(cells[1])}</td></tr>");
             }
             sb.Append($"</table></div></div><div class=\"order\"><span>{H.E(p.Str("getLabel", where))}</span>");
-            foreach (var line in p.Strings("get", where)) sb.Append($"<code>{H.E(line)}</code>");
+            // each line is colored on its own, in the project's getLanguage (cli, json, claude ...); "text" stays plain
+            var getLanguage = p.OptStr("getLanguage") ?? "text";
+            foreach (var line in p.Strings("get", where))
+                sb.Append($"<code>{(getLanguage == "text" ? H.E(line) : highlighter.Value.Html(line, getLanguage, where))}</code>");
             sb.Append("</div><p class=\"links\">");
             foreach (var link in p.Arr("links", where))
                 sb.Append($"<a href=\"{H.E(link.Str("url", where))}\">{H.E(link.Str("text", where))}</a>");
@@ -827,43 +839,56 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
     /// <summary>Matches <c>title="..."</c> in a fenced block's arguments.</summary>
     static readonly Regex CodeTitle = new("title=\"([^\"]*)\"", RegexOptions.Compiled);
 
-    /// <summary>A fenced code block as the session shows it: a command block with a Copy button, or an output block.</summary>
-    /// <param name="code">The block.</param>
+    /// <summary>A fenced code block as the session shows it: colored code with a Copy button, or plain output.</summary>
+    /// <param name="code">The block. Its info string names its language: any highlight.js language (sh, csharp,
+    /// json, xml ...), or the foundation's nasm, cli and claude; <c>text</c> for prose and <c>output</c> for a
+    /// program's output, which stay uncolored on purpose.</param>
     /// <param name="file">The file it came from, for error messages.</param>
     /// <returns>The block's HTML, with its file-name caption when it names one.</returns>
-    /// <exception cref="BuildException">An output block is empty.</exception>
-    /// <remarks>The text a Copy button copies is fixed at build time in <c>data-copy</c>: the commands without their
-    /// <c>$ </c> prompts and without the output lines between them, or the whole block when it has no prompts.
-    /// A block whose info string is <c>text</c> wraps its lines, for prose such as a prompt to type.</remarks>
-    static string CodeHtml(FencedCodeBlock code, string file)
+    /// <exception cref="BuildException">The block names no language (all code is colored, so an unmarked block is an
+    /// error, not plain text), names one no grammar knows, or is an empty output block.</exception>
+    /// <remarks>
+    /// Lines starting with <c>$ </c> are commands: each is colored on its own as a command line (cli), whatever the
+    /// block's language, and the lines between them are output, left plain.
+    /// The text a Copy button copies is fixed at build time in <c>data-copy</c>: the commands without their prompts
+    /// and without the output between them, or the whole block when it has no prompts.
+    /// A <c>text</c> block wraps its lines, for prose such as a prompt to type.
+    /// </remarks>
+    string CodeHtml(FencedCodeBlock code, string file)
     {
         var lines = code.Lines.ToString().Replace("\r\n", "\n").Split('\n');
-        var output = code.Info == "output";
-        // prose (a prompt to type, a sentence) wraps; code keeps its lines
-        var wrap = code.Info == "text" ? " wrap" : "";
+        var language = (code.Info ?? "").Trim();
+        if (language.Length == 0)
+            throw new BuildException($"{file}: a code block names no language; give it one (sh, csharp, json, xml, nasm, cli, claude ...), or text or output for blocks that are not code.");
+        var output = language == "output";
+        var prose = language == "text";
         if (output && lines.All(string.IsNullOrWhiteSpace)) throw new BuildException($"{file}: an empty output block.");
-        var prompts = lines.Any(l => l.StartsWith("$ ", StringComparison.Ordinal));
-        var html = new StringBuilder();
+        var prompts = !output && lines.Any(l => l.StartsWith("$ ", StringComparison.Ordinal));
         var copy = new List<string>();
-        foreach (var line in lines)
+        string html;
+        if (prompts)
         {
-            if (html.Length > 0) html.Append('\n');
-            if (!output && line.StartsWith("$ ", StringComparison.Ordinal))
+            var parts = new List<string>(lines.Length);
+            foreach (var line in lines)
             {
-                html.Append("<span class=\"p\" aria-hidden=\"true\">$ </span>").Append(H.E(line[2..]));
+                if (!line.StartsWith("$ ", StringComparison.Ordinal)) { parts.Add(H.E(line)); continue; }
+                parts.Add("<span class=\"p\" aria-hidden=\"true\">$ </span>" + highlighter.Value.Html(line[2..], "cli", file));
                 copy.Add(line[2..]);
             }
-            else
-            {
-                html.Append(H.E(line));
-                if (!prompts) copy.Add(line);
-            }
+            html = string.Join("\n", parts);
+        }
+        else
+        {
+            copy.AddRange(lines);
+            var text = string.Join("\n", lines);
+            // the whole block at once, so a comment or string spanning lines is colored as one
+            html = output || prose ? H.E(text) : highlighter.Value.Html(text, language, file);
         }
         var title = CodeTitle.Match(code.Arguments ?? "");
         var caption = title.Success ? $"<div class=\"ct\">{H.E(title.Groups[1].Value)}</div>" : "";
         return output
             ? $"{caption}<pre class=\"out\"><code>{html}</code></pre>"
-            : $"{caption}<pre class=\"cmd{wrap}\" data-copy=\"{H.E(string.Join("\n", copy))}\"><code>{html}</code></pre>";
+            : $"{caption}<pre class=\"cmd{(prose ? " wrap" : "")}\" data-copy=\"{H.E(string.Join("\n", copy))}\"><code class=\"hljs\">{html}</code></pre>";
     }
 
     // ------------------------------------------------------------------------------------------ History
@@ -1072,5 +1097,84 @@ static class GitHubHistory
             return $"GitHub's API rate limit is used up until {reset}. Set ASMF_GITHUB_TOKEN to a token, or build with --offline.";
         }
         return $"GitHub answered {(int)response.StatusCode} {response.ReasonPhrase} for {url}.";
+    }
+}
+
+/// <summary>
+/// Colors code at build time. highlight.js (vendored in site/highlight/vendor, with its x86 grammar) and the
+/// foundation's own grammars (site/highlight/asmfoundation.js: nasm, cli, claude) run inside Jint, a JavaScript
+/// interpreter for .NET, so the pages ship colored HTML and no highlighting script.
+/// </summary>
+/// <remarks>
+/// The output uses highlight.js's own token classes (hljs-keyword, hljs-string, ...), the ones AsmSdk's documentation
+/// site colors, so one palette serves both sites. The engine gets no access to .NET or the disk: the scripts
+/// receive code and return HTML, and a console that reports to the build. One engine serves a whole build;
+/// it is not thread-safe, and the build is single-threaded.
+/// </remarks>
+sealed class Highlighter
+{
+    /// <summary>The scripts, in load order: the language files call <c>hljs.registerLanguage</c> on the core.</summary>
+    static readonly string[] Scripts = ["vendor/highlight.min.js", "vendor/languages/x86asm.min.js", "asmfoundation.js"];
+
+    readonly Engine engine;
+    readonly JsValue highlight;
+    readonly JsValue known;
+    readonly List<string> warnings = [];
+
+    /// <summary>Starts the engine and loads highlight.js and the grammars.</summary>
+    /// <param name="directory">The site/highlight folder.</param>
+    /// <exception cref="BuildException">A script is missing, or fails to load (a bad update of the vendored files).</exception>
+    public Highlighter(string directory)
+    {
+        engine = new Engine(options => options.TimeoutInterval(TimeSpan.FromSeconds(60)));
+        // highlight.js reports problems through console.warn and console.error: collect them, so the build can fail
+        // on any instead of shipping code colored by a grammar that complained
+        engine.SetValue("__warn", new Action<string>(warnings.Add));
+        engine.Execute("var console = { log: function () {}, info: function () {}, "
+                       + "warn: function () { __warn(Array.prototype.join.call(arguments, ' ')); }, "
+                       + "error: function () { __warn(Array.prototype.join.call(arguments, ' ')); } };");
+        foreach (var script in Scripts)
+        {
+            var path = Path.Combine(directory, script);
+            if (!File.Exists(path)) throw new BuildException($"site/highlight/{script} does not exist.");
+            try
+            {
+                engine.Execute(File.ReadAllText(path));
+            }
+            catch (Exception e) when (e is not BuildException)
+            {
+                throw new BuildException($"site/highlight/{script} failed to load: {e.Message}", e);
+            }
+        }
+        highlight = engine.Evaluate("(function (code, language) { return hljs.highlight(code, { language: language, ignoreIllegals: true }).value; })");
+        known = engine.Evaluate("(function (language) { return !!hljs.getLanguage(language); })");
+    }
+
+    /// <summary>Colors one piece of code.</summary>
+    /// <param name="code">The code, as plain text.</param>
+    /// <param name="language">A highlight.js language name or alias (sh, csharp, json, xml ...), or nasm, cli or claude.</param>
+    /// <param name="where">The file or data item the code comes from, for error messages.</param>
+    /// <returns>HTML: the code, escaped, with its tokens in <c>&lt;span class="hljs-..."&gt;</c>.</returns>
+    /// <exception cref="BuildException">No grammar has that name, highlight.js threw, or it warned while coloring.</exception>
+    public string Html(string code, string language, string where)
+    {
+        if (!engine.Invoke(known, language).AsBoolean())
+            throw new BuildException($"{where}: no grammar is called \"{language}\". Use a highlight.js language (sh, csharp, json, xml ...), nasm, cli or claude; or text or output for blocks that are not code.");
+        string html;
+        try
+        {
+            html = engine.Invoke(highlight, code, language).AsString();
+        }
+        catch (JavaScriptException e)
+        {
+            throw new BuildException($"{where}: highlight.js failed on a {language} block: {e.Message}", e);
+        }
+        if (warnings.Count > 0)
+        {
+            var said = string.Join("; ", warnings);
+            warnings.Clear();
+            throw new BuildException($"{where}: highlight.js warned while coloring a {language} block: {said}");
+        }
+        return html;
     }
 }

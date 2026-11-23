@@ -1,6 +1,8 @@
 // The Projects page's datasheets, in the order shown. Every speed figure carries its one-core number
 // (the owner's rule: "1 core everywhere"), and every figure comes from the source named in benchmarks.json
 // or the project's own claims ledger. Change a figure here and on the Benchmarks page together.
+// "getLanguage" colors the "get" lines, each on its own: cli (commands), json, claude (slash commands), or any
+// highlight.js language; without it they stay plain text, which suits a bare address.
 {
   "projects": [
     {
@@ -23,6 +25,7 @@
         ["h2spec", "146 of 146"]
       ],
       "getLabel": "Install",
+      "getLanguage": "cli",
       "get": [
         "docker run --rm -p 50051:50051 ghcr.io/asmfoundation/kvasm:0.3.0",
         "dotnet add package KvAsm.Client"
@@ -52,6 +55,7 @@
         ["Licence", "Apache-2.0"]
       ],
       "getLabel": "Install, in global.json",
+      "getLanguage": "json",
       "get": ["{ \"msbuild-sdks\": { \"AsmFoundation.Sdk\": \"0.3.0\" } }"],
       "links": [
         { "text": "Documentation", "url": "https://asmfoundation.github.io/AsmSdk/" },
@@ -125,6 +129,7 @@
         ["Version evaluated", "plugin 0.1.0"]
       ],
       "getLabel": "Install, in Claude Code",
+      "getLanguage": "claude",
       "get": [
         "/plugin marketplace add AsmFoundation/AsmClaudeMarketplace",
         "/plugin install asmsdk@asmfoundation"
