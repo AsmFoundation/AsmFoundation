@@ -5,9 +5,9 @@
 // writes it to architecture/drawing.svg as well, and that page shows the file from the website. One change here
 // updates both, after the next build.
 {
-  "updated": "2026-11-23",
+  "updated": "2026-11-24",
   "summary": "Section drawing of the foundation: machine code at the bottom, AsmSdk above it, HttpAsm and GrpcAsm above that, and sixteen service rooms on top, of which Cache is released and Storage is in design.",
-  "foundation": "The foundation: x86-64 and ARM64 machine code",
+  "foundation": "The foundation: x86-64, ARM64 and WebAssembly code",
   "services": [
     { "name": "Compute" },
     { "name": "Containers" },
@@ -30,5 +30,5 @@
     { "name": "HttpAsm", "status": "dev", "sub": "HTTP/1.1, /2 and /3, QUIC and TLS. In development.", "text": "In development: HTTP/1.1, /2 and /3, with QUIC and TLS of its own, as client and server." },
     { "name": "GrpcAsm", "status": "dev", "sub": "gRPC server and client. In development.", "text": "In development: a gRPC server and client with NASM, C and .NET APIs." }
   ],
-  "build": { "name": "AsmSdk", "status": "rel", "sub": "Builds, tests and packages every project for seven platforms. Released 0.3.0.", "text": "Released 0.3.0: builds, tests and packages assembly for seven platforms with dotnet build." }
+  "build": { "name": "AsmSdk", "status": "rel", "sub": "Builds, tests and packages every project for seven platforms and WebAssembly. Released 0.3.0.", "text": "Released 0.3.0: builds, tests and packages assembly for seven platforms and WebAssembly with dotnet build." }
 }

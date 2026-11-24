@@ -11,6 +11,7 @@
     { "date": "2026-11-17", "title": "AsmSdk 0.1.0", "text": ".asmproj projects for x86-64 assembly, with a bundled NASM and LLVM.", "repo": "AsmSdk", "commit": "d36d138" },
     { "date": "2026-11-17", "title": "GrpcAsm begins", "text": "The plan for a gRPC server and client in assembly.", "repo": "GrpcAsm", "commit": "29dfa08" },
     { "date": "2026-11-17", "title": "The Claude marketplace", "text": "The asmfoundation marketplace and the asmsdk plugin.", "repo": "AsmClaudeMarketplace", "commit": "6d544b7" },
-    { "date": "2026-11-23", "title": "HttpAsm begins", "text": "HTTP/1.1, /2 and /3, written from the RFC files.", "repo": "HttpAsm", "commit": "b963183" }
+    { "date": "2026-11-23", "title": "HttpAsm begins", "text": "HTTP/1.1, /2 and /3, written from the RFC files.", "repo": "HttpAsm", "commit": "b963183" },
+    { "date": "2026-11-24", "title": "AsmSdk: WebAssembly", "text": "The third target, after x86-64 and ARM64: modules, WASI programs and .NET WebAssembly apps.", "repo": "AsmSdk", "commit": "1217ca5" }
   ]
 }

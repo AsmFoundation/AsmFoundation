@@ -43,13 +43,13 @@
       "summary": "Assembly projects on MSBuild and NuGet",
       "features": [
         ".asmproj next to .csproj, built with dotnet build",
-        "NASM for x64, GNU syntax for ARM64",
-        "Windows, Linux and macOS, on x64 and ARM64",
+        "NASM for x64, GNU syntax for ARM64, LLVM's for WebAssembly",
+        "Windows, Linux and macOS on x64 and ARM64, and WebAssembly for browsers and WASI",
         "The assembler and linker restore from NuGet"
       ],
       "factsTitle": "Facts",
       "facts": [
-        ["Platforms", "7 runtime identifiers"],
+        ["Platforms", "9 runtime identifiers"],
         ["Toolchain", "NASM 3.02 and LLVM 23.1.5"],
         ["CRC-32C sample, 1 core", "21.8 GB/s, 3.7× the C# loop"],
         ["Licence", "Apache-2.0"]

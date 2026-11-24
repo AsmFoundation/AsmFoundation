@@ -10,6 +10,7 @@
       "entries": [
         { "title": "Getting started: a library, a program and a C# caller", "url": "https://asmfoundation.github.io/AsmSdk/guide/getting-started.html", "kind": "guide" },
         { "title": "Platforms and runtime identifiers", "url": "https://asmfoundation.github.io/AsmSdk/guide/platforms.html", "kind": "guide" },
+        { "title": "WebAssembly: modules, WASI programs and .NET WebAssembly apps", "url": "https://asmfoundation.github.io/AsmSdk/guide/webassembly.html", "kind": "guide" },
         { "title": "Calling assembly from .NET", "url": "https://asmfoundation.github.io/AsmSdk/guide/interop.html", "kind": "guide" },
         { "title": "Programs: run, publish, pack as a tool", "url": "https://asmfoundation.github.io/AsmSdk/guide/programs.html", "kind": "guide" },
         { "title": "References and packages", "url": "https://asmfoundation.github.io/AsmSdk/guide/references-and-packages.html", "kind": "guide" },
