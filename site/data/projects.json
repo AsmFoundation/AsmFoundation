@@ -157,6 +157,25 @@
       "getLabel": "Source",
       "get": ["not public yet"],
       "links": []
+    },
+    {
+      "name": "ContainersAsm",
+      "status": "des",
+      "stamp": "In design",
+      "date": "since 2026-11-26",
+      "summary": "A container runtime and shim in assembly, and LinuxAsmOS images",
+      "features": [
+        "Drops in for runc and containerd's shim",
+        "Images that hold only what their program uses"
+      ],
+      "factsTitle": "Status",
+      "facts": [
+        ["Code", "not public yet"],
+        ["Release", "not yet"]
+      ],
+      "getLabel": "Source",
+      "get": ["not public yet"],
+      "links": []
     }
   ]
 }
