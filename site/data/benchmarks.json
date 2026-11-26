@@ -1,4 +1,8 @@
-// The Benchmarks page's charts, in the order shown: two per row, one core on the left, more cores on the right.
+// The Benchmarks page's charts, in the order shown, two per row. KvAsm's and GrpcAsm's rows put one core on the
+// left and four on the right. CRC-32C puts its two one-core charts on one row and their four-core charts on the
+// row directly below, each under its one-core chart (the owner, 2026-11-26: "1core like we have now but below it
+// 4 core aswell"); the one-core charts keep the 2026-11-19 run and the four-core charts come from 2026-11-26's,
+// so each four-core note gives its own run's one-core figures (the owner's choice, "Build as picked").
 // Each row of a chart: label, value (in the chart's unit, 0..max), the text shown for it, "ours" for our
 // bar, "show" to print a rival's value on its bar too. Every number is copied from the source it names.
 {
@@ -71,16 +75,42 @@
     },
     {
       "title": "CRC-32C of 64 bytes, one core",
-      "question": "Nanoseconds per call; less is better. Here C# wins: calling native code costs as much as the checksum",
-      "max": 15,
+      "question": "Millions of checksums per second; more is better. Here C# wins: calling native code costs as much as the checksum",
+      "max": 350,
       "rows": [
-        { "label": "Assembly", "value": 13.0, "text": "13.0 ns", "ours": true },
-        { "label": "C# loop", "value": 3.35, "text": "3.35 ns", "show": true }
+        { "label": "Assembly", "value": 76.9, "text": "76.9M", "ours": true },
+        { "label": "C# loop", "value": 299, "text": "299M", "show": true }
       ],
-      "ticks": [[0, "0"], [5, "5"], [10, "10"], [15, "15 ns"]],
-      "note": "From 256 bytes on the assembly wins: 1.16× at 256 bytes, 3.1× at 1 KiB.",
-      "source": "AsmSdk Crc32C sample, same run",
+      "ticks": [[0, "0"], [100, "100M"], [200, "200M"], [300, "300M"]],
+      "note": "From 256 bytes on the assembly wins: 1.16× at 256 bytes, 3.1× at 1 KiB. (Converted from 13.0 and 3.35 ns per call.)",
+      "source": "AsmSdk Crc32C sample, i9-13900K, median of three runs",
       "url": "https://asmfoundation.github.io/AsmSdk/examples/testing-and-benchmarks.html"
+    },
+    {
+      "title": "CRC-32C of 1 MiB, four cores",
+      "question": "GB/s of four cores at once, each checksumming its own 1 MiB; more is better",
+      "max": 100,
+      "rows": [
+        { "label": "Assembly", "value": 79.9, "text": "79.9 GB/s", "ours": true },
+        { "label": "C# loop", "value": 23.0, "text": "23.0 GB/s", "show": true }
+      ],
+      "ticks": [[0, "0"], [25, "25"], [50, "50"], [75, "75"], [100, "100 GB/s"]],
+      "note": "From a different run than the chart above: that run's own one-core figures were 20.0 and 5.74 GB/s, so its totals grew 4.0×.",
+      "source": "AsmSdk Crc32C sample, 2026-11-26: 3 runs of 12 paired rounds, one core and four, pinned",
+      "url": "https://github.com/AsmFoundation/AsmSdk/blob/main/samples/Crc32C.Bench/results/2026-11-26-i9-13900K-cores/README.md"
+    },
+    {
+      "title": "CRC-32C of 64 bytes, four cores",
+      "question": "Millions of checksums per second, four cores at once; more is better",
+      "max": 800,
+      "rows": [
+        { "label": "Assembly", "value": 461, "text": "461M", "ours": true },
+        { "label": "C# loop", "value": 749, "text": "749M", "show": true }
+      ],
+      "ticks": [[0, "0"], [200, "200M"], [400, "400M"], [600, "600M"], [800, "800M"]],
+      "note": "From a different run than the chart above: that run's own one-core figures were 115M and 187M, so both totals grew 4.0×.",
+      "source": "AsmSdk Crc32C sample, 2026-11-26: 3 runs of 12 paired rounds, one core and four, pinned",
+      "url": "https://github.com/AsmFoundation/AsmSdk/blob/main/samples/Crc32C.Bench/results/2026-11-26-i9-13900K-cores/README.md"
     }
   ]
 }
