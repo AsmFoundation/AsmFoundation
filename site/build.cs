@@ -23,8 +23,10 @@
 //   highlight/         highlight.js and the foundation's own grammars, run at build time to color every code
 //                      block (see Highlighter); nothing in it is published.
 //   assets/            copied as is. assets/card.png is the link-preview image every page names in og:image.
-//   card/              the source of assets/card.png (card.html, with the command that renders it); not read
-//                      by the build and not published: the PNG is rendered by hand and committed.
+//   card/              the source of assets/card.png (card.html, with the command that renders it), of the
+//                      repositories' social previews (repo.html, rendered into repos/) and the organization's
+//                      crop-safe avatar (avatar.png). Not read by the build and not published: the PNGs are
+//                      rendered by hand and committed, and the GitHub ones are uploaded in GitHub's settings.
 // The About log also lists every commit and tag of the organization's public repositories, read from
 // the GitHub API at build time. ASMF_GITHUB_TOKEN, when set, raises the API's rate limit; CI passes its
 // GITHUB_TOKEN there. A dedicated variable on purpose: a stale GH_TOKEN in a shell must not break builds.
