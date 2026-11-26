@@ -152,7 +152,7 @@ static class Site
         foreach (var path in Directory.GetFiles(Path.Combine(o.SiteDirectory, "pages"), "*.html").Order(StringComparer.Ordinal))
         {
             var page = PageSource.Load(path);
-            if (!files.TryAdd(page.OutputPath, Layout.Render(layout, page, parts)))
+            if (!files.TryAdd(page.OutputPath, Layout.Render(layout, page, parts, Path.Combine(o.SiteDirectory, "assets"))))
                 throw new BuildException($"{page.Name}: another page already writes {page.OutputPath}.");
         }
         files["sitemap.xml"] = Sitemap(files.Keys);
@@ -214,7 +214,9 @@ static class Site
 /// <param name="Meta">The front matter, by key: <c>title</c> (required), <c>title-full</c>, <c>description</c>,
 /// <c>path</c> (required: "" for the home page, "projects/" for a folder page, "404.html" for a file),
 /// <c>nav</c> (which navigation item is current), <c>scripts</c> (asset scripts, space-separated),
-/// <c>body</c> (the body's class) and <c>root: absolute</c> (for pages served at any depth, like 404.html).</param>
+/// <c>body</c> (the body's class), <c>root: absolute</c> (for pages served at any depth, like 404.html), and
+/// <c>card</c> with <c>card-alt</c> (the page's own link-preview card under assets/, and what it shows; without
+/// them the page shows the site's card).</param>
 /// <param name="Body">The HTML after the front matter.</param>
 sealed record PageSource(string Name, IReadOnlyDictionary<string, string> Meta, string Body)
 {
@@ -283,16 +285,30 @@ static class Layout
     /// <summary>Matches a placeholder that nothing filled, which is a typo in a page or the layout.</summary>
     static readonly Regex Leftover = new(@"\{\{[a-z-]+\}\}", RegexOptions.Compiled);
 
+    /// <summary>The site's link-preview card, under assets/: every page that names none of its own shows it.</summary>
+    const string DefaultCard = "card.png";
+
+    /// <summary>What the site's card shows, for readers who cannot see it.</summary>
+    const string DefaultCardAlt = "AsmFoundation: hand-written x86-64 assembly, the services clouds run on, free under Apache-2.0. Beside it, KvAsm's AES-NI key hash in NASM: ten AES rounds.";
+
     /// <summary>Renders one page: its generated parts, then the layout around it, then the root prefix everywhere.</summary>
     /// <param name="layout">The text of layout.html.</param>
     /// <param name="page">The page.</param>
     /// <param name="parts">The generated parts the page's markers name.</param>
+    /// <param name="assets">The site's assets folder, where the page's link-preview card must be.</param>
     /// <returns>The finished HTML document.</returns>
-    /// <exception cref="BuildException">A marker names no part, a part fails, or a placeholder is left unfilled.</exception>
+    /// <exception cref="BuildException">A marker names no part, a part fails, a placeholder is left unfilled, or
+    /// the page's card is missing, outside assets/, or not a PNG.</exception>
     /// <remarks><c>{{root}}</c> is replaced last, so page bodies and generated parts can use it in their own links.</remarks>
-    public static string Render(string layout, PageSource page, Parts parts)
+    public static string Render(string layout, PageSource page, Parts parts, string assets)
     {
         var body = Marker.Replace(page.Body, m => parts.Render(m.Groups[1].Value, page));
+        // The page's link-preview card (front matter "card", a PNG under assets/), else the site's. Its size comes
+        // from the file, so og:image:width and og:image:height cannot drift from what pages.cs rendered.
+        var card = page.Meta.GetValueOrDefault("card") ?? DefaultCard;
+        var cardAlt = page.Meta.GetValueOrDefault("card-alt") ?? (card == DefaultCard ? DefaultCardAlt : "");
+        if (cardAlt.Length == 0) throw new BuildException($"{page.Name}: card {card} needs a card-alt line saying what it shows.");
+        var (cardWidth, cardHeight) = PngSize(assets, card, page.Name);
         var title = page.Meta.TryGetValue("title-full", out var full) ? full : $"{page.Title} - {Site.Org}";
         var scripts = string.Concat((page.Meta.GetValueOrDefault("scripts") ?? "")
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
@@ -308,6 +324,10 @@ static class Layout
             .Replace("{{og-url}}", canonical.Length == 0 ? "" : $"<meta property=\"og:url\" content=\"{canonical}\">")
             // link-preview crawlers resolve nothing relative: the card's og:image needs the absolute address
             .Replace("{{base}}", Site.BaseUrl)
+            .Replace("{{card}}", H.E(card))
+            .Replace("{{card-width}}", cardWidth.ToString(CultureInfo.InvariantCulture))
+            .Replace("{{card-height}}", cardHeight.ToString(CultureInfo.InvariantCulture))
+            .Replace("{{card-alt}}", H.E(cardAlt))
             .Replace("{{body}}", H.E(page.Meta.GetValueOrDefault("body") ?? ""))
             .Replace("{{nav}}", Nav(page))
             .Replace("{{content}}", body)
@@ -316,6 +336,29 @@ static class Layout
         var left = Leftover.Match(html);
         if (left.Success) throw new BuildException($"{page.Name}: nothing fills the placeholder {left.Value}.");
         return html;
+    }
+
+    /// <summary>Reads a link-preview card's pixel size from its PNG header (the IHDR chunk).</summary>
+    /// <param name="assets">The site's assets folder.</param>
+    /// <param name="card">The card, relative to assets/ ("cards/benchmarks.png").</param>
+    /// <param name="pageName">The page that names it, for the error message.</param>
+    /// <returns>The width and height in pixels.</returns>
+    /// <exception cref="BuildException">The card leaves assets/, is missing, or is not a PNG: the page would
+    /// promise crawlers an image they cannot show.</exception>
+    static (int Width, int Height) PngSize(string assets, string card, string pageName)
+    {
+        if (card.StartsWith('/') || card.Contains("..", StringComparison.Ordinal) || !card.EndsWith(".png", StringComparison.Ordinal))
+            throw new BuildException($"{pageName}: card {card} must be a .png under site/assets/.");
+        var path = Path.Combine(assets, card);
+        if (!File.Exists(path)) throw new BuildException($"{pageName}: card {card} is not in site/assets/ (render it with dotnet run site/card/pages.cs).");
+        Span<byte> head = stackalloc byte[24];
+        using (var f = File.OpenRead(path))
+            if (f.ReadAtLeast(head, 24, throwOnEndOfStream: false) < 24) throw new BuildException($"{pageName}: card {card} is not a PNG.");
+        // the 8-byte signature, the IHDR chunk's length and type, then its width and height, big-endian
+        if (head[0] != 0x89 || head[1] != (byte)'P' || head[2] != (byte)'N' || head[3] != (byte)'G')
+            throw new BuildException($"{pageName}: card {card} is not a PNG.");
+        return (System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(head[16..]),
+                System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(head[20..]));
     }
 
     /// <summary>The navigation links, with the page's own item marked current.</summary>

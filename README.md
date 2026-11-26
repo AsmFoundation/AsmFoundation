@@ -59,7 +59,8 @@ in a shell must not break a build.
 | The shell around every page | `site/layout.html` |
 | Styles and scripts | `site/assets/` |
 | How code is colored | `site/highlight/` (the grammars) and the token colors in `site/assets/site.css` |
-| The link-preview card (what X, LinkedIn, Slack and Discord show for a shared link) | `site/card/card.html`, then render it to `site/assets/card.png` with the command in its header; `site/layout.html` declares it on every page |
+| The link-preview card (what X, LinkedIn, Slack and Discord show for a shared link) | `site/card/card.html`, then render it to `site/assets/card.png` with the command in its header; Home and every page without a card of its own show it |
+| A page's own card (Projects, Docs, Benchmarks, Architecture, Get started, About) | After a change to what the page opens with (a figure, a project's state, a chart): `dotnet run site/build.cs`, then `dotnet run site/card/pages.cs`, which captures each page's first block from the built site into `site/assets/cards/<page>.png`; commit the PNGs. The page's front matter names its card (`card`, `card-alt`), and the build stops if the file is missing |
 | The line under the title in link previews | `og:description` in `site/layout.html`: the owner's sentence, the same on every page (each page's own `description` stays for search engines) |
 | The icons (browser tabs, iPhones, Slack, Google) | `site/root/favicon.ico` and `site/root/apple-touch-icon.png`, copied to the site's root where unfurlers look; `site/assets/favicon.svg`; `site/assets/icon-512.png`, the logo in the home page's structured data |
 | A repository's social preview (its card when a repository link is shared) | `site/card/repo.html`, rendered to `site/card/repos/<Repository>.png`, then uploaded by hand in the repository's Settings > Social preview (GitHub has no API for it) |

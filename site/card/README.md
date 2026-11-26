@@ -6,13 +6,18 @@ ones are uploaded in GitHub's settings. The owner chose every design on 2026-11-
 
 | File | What it is | Where it goes |
 |---|---|---|
-| `card.html` | The website's card, "The listing": the logo, "Hand-written x86-64 assembly." and KvAsm's AES-NI key hash (`server/src/aeshash.asm`, lines 64-76, unchanged), colored by the site's own highlighter | Rendered to `../assets/card.png`, which every page names in `og:image` (`../layout.html`) |
+| `card.html` | The website's card, "The listing": the logo, "Hand-written x86-64 assembly." and KvAsm's AES-NI key hash (`server/src/aeshash.asm`, lines 64-76, unchanged), colored by the site's own highlighter | Rendered to `../assets/card.png`, which Home, the 404 page and any page without a card of its own name in `og:image` |
+| `page.html`, `pages.cs` | The six pages' own cards: the page's name over the block it opens with (Projects' first datasheets, Docs' contents, Benchmarks' read charts, Architecture's drawing, Get started's first step, About's log and facts), captured from the built site | `dotnet run site/card/pages.cs` after `dotnet run site/build.cs` writes `../assets/cards/<page>.png` (1200x630); each page's front matter names its card (`card`, `card-alt`) |
 | `repo.html` | The repositories' social previews, one family: the logo, the repository's name, one line, the address | Rendered to `repos/<Repository>.png`, uploaded in each repository's Settings > General > Social preview |
 | `avatar.png` | The organization's avatar, made crop-safe | Uploaded in the organization's Settings > General > Profile picture |
 
-Each HTML file's header holds the exact headless Chrome command that renders it. Pass
+`card.html` and `repo.html` hold, in their headers, the exact headless Chrome command that renders them. Pass
 `--allow-file-access-from-files`: without it Chrome refuses the `@font-face` files from a `file://` page and
-the card silently falls back to system fonts.
+the card silently falls back to system fonts. `pages.cs` starts its own headless Chrome with that flag.
+
+**The page cards are rendered by hand** (the owner's choice over rendering them in CI): they show the pages' own
+data, so re-render them whenever a page's opening changes, a new figure, a project's new state or a new chart,
+and commit them with that change. A stale card shows yesterday's numbers in every preview of that page.
 
 ## How X draws a link
 
