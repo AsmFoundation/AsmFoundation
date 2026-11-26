@@ -30,5 +30,5 @@
     { "name": "HttpAsm", "status": "dev", "sub": "HTTP/1.1, /2 and /3, QUIC and TLS. In development.", "text": "In development: HTTP/1.1, /2 and /3, with QUIC and TLS of its own, as client and server." },
     { "name": "GrpcAsm", "status": "dev", "sub": "gRPC server and client. In development.", "text": "In development: a gRPC server and client with NASM, C and .NET APIs." }
   ],
-  "build": { "name": "AsmSdk", "status": "rel", "sub": "Builds, tests and packages every project for seven platforms and WebAssembly. Released 0.3.0.", "text": "Released 0.3.0: builds, tests and packages assembly for seven platforms and WebAssembly with dotnet build." }
+  "build": { "name": "AsmSdk", "status": "rel", "sub": "Builds, tests and packages every project for eight platforms and WebAssembly. Released 0.4.0.", "text": "Released 0.4.0: builds, tests and packages assembly for eight platforms and WebAssembly with dotnet build, and writes its C# bindings." }
 }

@@ -18,7 +18,7 @@ Type it in Claude Code. The marketplace is called `asmfoundation`; it holds one 
 /plugin install asmsdk@asmfoundation
 ```
 
-The plugin follows AsmSdk's releases: plugin 0.3.0 teaches SDK 0.3.0.
+The plugin follows AsmSdk's releases: plugin 0.4.0 teaches SDK 0.4.0.
 
 ### Ask for a project
 

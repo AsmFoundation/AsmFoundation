@@ -38,25 +38,26 @@
     {
       "name": "AsmSdk",
       "status": "rel",
-      "stamp": "Released 0.3.0",
-      "date": "2026-11-21",
+      "stamp": "Released 0.4.0",
+      "date": "2026-11-26",
       "summary": "Assembly projects on MSBuild and NuGet",
       "features": [
         ".asmproj next to .csproj, built with dotnet build",
         "NASM for x64, GNU syntax for ARM64, LLVM's for WebAssembly",
         "Windows, Linux and macOS on x64 and ARM64, and WebAssembly for browsers and WASI",
+        "C# bindings and a C header from each function's PROTO line",
         "The assembler and linker restore from NuGet"
       ],
       "factsTitle": "Facts",
       "facts": [
-        ["Platforms", "9 runtime identifiers"],
+        ["Platforms", "10 runtime identifiers"],
         ["Toolchain", "NASM 3.02 and LLVM 23.1.5"],
         ["CRC-32C sample, 1 core", "21.8 GB/s, 3.7× the C# loop"],
         ["Licence", "Apache-2.0"]
       ],
       "getLabel": "Install, in global.json",
       "getLanguage": "json",
-      "get": ["{ \"msbuild-sdks\": { \"AsmFoundation.Sdk\": \"0.3.0\" } }"],
+      "get": ["{ \"msbuild-sdks\": { \"AsmFoundation.Sdk\": \"0.4.0\" } }"],
       "links": [
         { "text": "Documentation", "url": "https://asmfoundation.github.io/AsmSdk/" },
         { "text": "Repository", "url": "https://github.com/AsmFoundation/AsmSdk" }
@@ -114,12 +115,12 @@
     {
       "name": "AsmClaudeMarketplace",
       "status": "rel",
-      "stamp": "asmsdk plugin 0.3.0",
-      "date": "2026-11-21",
+      "stamp": "asmsdk plugin 0.4.0",
+      "date": "2026-11-26",
       "summary": "Claude Code plugins that teach coding agents this ecosystem",
       "features": [
         "The asmsdk plugin: the SDK's rules and recipes",
-        "A project linter with 45 checks, judged per OS",
+        "A project linter with 67 checks, judged per OS and SDK version",
         "A project scaffolder"
       ],
       "factsTitle": "Evaluated",
