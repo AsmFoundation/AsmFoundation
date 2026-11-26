@@ -22,7 +22,9 @@
 //   get-started/*.md   one section of the Get started page each, in file-name order (see Parts.GetStarted).
 //   highlight/         highlight.js and the foundation's own grammars, run at build time to color every code
 //                      block (see Highlighter); nothing in it is published.
-//   assets/            copied as is.
+//   assets/            copied as is. assets/card.png is the link-preview image every page names in og:image.
+//   card/              the source of assets/card.png (card.html, with the command that renders it); not read
+//                      by the build and not published: the PNG is rendered by hand and committed.
 // The About log also lists every commit and tag of the organization's public repositories, read from
 // the GitHub API at build time. ASMF_GITHUB_TOKEN, when set, raises the API's rate limit; CI passes its
 // GITHUB_TOKEN there. A dedicated variable on purpose: a stale GH_TOKEN in a shell must not break builds.
@@ -283,6 +285,11 @@ static class Layout
             .Replace("{{title}}", H.E(title))
             .Replace("{{description}}", H.E(page.Meta.GetValueOrDefault("description") ?? ""))
             .Replace("{{canonical}}", canonical.Length == 0 ? "" : $"<link rel=\"canonical\" href=\"{canonical}\">")
+            // og:url names the same address as the canonical link, so a share of /projects/ and one of
+            // /projects/index.html count as one page; the 404 page, which has no address, gets none
+            .Replace("{{og-url}}", canonical.Length == 0 ? "" : $"<meta property=\"og:url\" content=\"{canonical}\">")
+            // link-preview crawlers resolve nothing relative: the card's og:image needs the absolute address
+            .Replace("{{base}}", Site.BaseUrl)
             .Replace("{{body}}", H.E(page.Meta.GetValueOrDefault("body") ?? ""))
             .Replace("{{nav}}", Nav(page))
             .Replace("{{content}}", body)

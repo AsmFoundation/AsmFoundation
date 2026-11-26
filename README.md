@@ -59,6 +59,7 @@ in a shell must not break a build.
 | The shell around every page | `site/layout.html` |
 | Styles and scripts | `site/assets/` |
 | How code is colored | `site/highlight/` (the grammars) and the token colors in `site/assets/site.css` |
+| The link-preview card (what X, LinkedIn, Slack and Discord show for a shared link) | `site/card/card.html`, then render it to `site/assets/card.png` with the command in its header; `site/layout.html` declares it on every page |
 
 The generator, `site/build.cs`, documents every format it reads. Its rules, which a build enforces:
 
