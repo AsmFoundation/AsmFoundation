@@ -60,6 +60,8 @@ in a shell must not break a build.
 | Styles and scripts | `site/assets/` |
 | How code is colored | `site/highlight/` (the grammars) and the token colors in `site/assets/site.css` |
 | The link-preview card (what X, LinkedIn, Slack and Discord show for a shared link) | `site/card/card.html`, then render it to `site/assets/card.png` with the command in its header; `site/layout.html` declares it on every page |
+| The line under the title in link previews | `og:description` in `site/layout.html`: the owner's sentence, the same on every page (each page's own `description` stays for search engines) |
+| The icons (browser tabs, iPhones, Slack, Google) | `site/root/favicon.ico` and `site/root/apple-touch-icon.png`, copied to the site's root where unfurlers look; `site/assets/favicon.svg`; `site/assets/icon-512.png`, the logo in the home page's structured data |
 | A repository's social preview (its card when a repository link is shared) | `site/card/repo.html`, rendered to `site/card/repos/<Repository>.png`, then uploaded by hand in the repository's Settings > Social preview (GitHub has no API for it) |
 | The organization's avatar | `site/card/avatar.png`, uploaded by hand in the organization's settings. It is crop-safe: X shows it for links to github.com/AsmFoundation, cut to its middle 52%, so the whole logo sits in that band |
 

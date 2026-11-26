@@ -23,6 +23,9 @@
 //   highlight/         highlight.js and the foundation's own grammars, run at build time to color every code
 //                      block (see Highlighter); nothing in it is published.
 //   assets/            copied as is. assets/card.png is the link-preview image every page names in og:image.
+//   root/              copied as is to the site's root, not under assets/: favicon.ico and apple-touch-icon.png,
+//                      which unfurlers and iPhones request at the root whatever the pages link. A name the build
+//                      also writes (index.html, sitemap.xml ...) stops the build.
 //   card/              the source of assets/card.png (card.html, with the command that renders it), of the
 //                      repositories' social previews (repo.html, rendered into repos/) and the organization's
 //                      crop-safe avatar (avatar.png). Not read by the build and not published: the PNGs are
@@ -58,7 +61,7 @@ return await Site.RunAsync(args);
 sealed class BuildException(string message, Exception? inner = null) : Exception(message, inner);
 
 /// <summary>What one run of the generator builds, and from where.</summary>
-/// <param name="SiteDirectory">The <c>site/</c> folder: layout.html, pages/, data/, get-started/ and assets/.</param>
+/// <param name="SiteDirectory">The <c>site/</c> folder: layout.html, pages/, data/, get-started/, assets/ and root/.</param>
 /// <param name="OutputDirectory">Where the finished site goes. It is deleted and recreated on every build, so
 /// <see cref="Parse"/> refuses any folder that contains the sources.</param>
 /// <param name="Offline">True to skip the GitHub API; the About log then lists only the curated milestones.
@@ -130,10 +133,12 @@ static class Site
         }
     }
 
-    /// <summary>Renders every page in memory, then replaces the output folder with the result and the assets.</summary>
+    /// <summary>Renders every page in memory, then replaces the output folder with the result, the assets and the
+    /// root files.</summary>
     /// <param name="o">What to build and where.</param>
     /// <returns>The number of HTML pages written.</returns>
-    /// <exception cref="BuildException">Any source problem, or a GitHub API failure when not offline.</exception>
+    /// <exception cref="BuildException">Any source problem, a GitHub API failure when not offline, a missing
+    /// <c>site/root</c>, or a root file with the name of a generated one.</exception>
     /// <remarks>The output folder is deleted only after every page rendered, so a failed build leaves the previous
     /// output in place.</remarks>
     public static async Task<int> BuildAsync(BuildOptions o)
@@ -155,6 +160,16 @@ static class Site
         // the Architecture drawing as an image of its own: the GitHub organization page embeds it from this address
         files["architecture/drawing.svg"] = parts.ArchitectureDrawing();
 
+        // Files that only work at the site's root: unfurlers (Slack among them) and iPhones ask for /favicon.ico
+        // and /apple-touch-icon.png there, whatever the pages' <link> tags say. Checked here, before the output
+        // folder is deleted, so a missing folder or a clash with a generated file keeps the previous output.
+        var root = Path.Combine(o.SiteDirectory, "root");
+        if (!Directory.Exists(root)) throw new BuildException($"{root} does not exist: it holds favicon.ico and apple-touch-icon.png.");
+        var rootFiles = Directory.GetFiles(root);
+        foreach (var file in rootFiles)
+            if (files.ContainsKey(Path.GetFileName(file)))
+                throw new BuildException($"site/root/{Path.GetFileName(file)}: the build already writes a file of that name.");
+
         if (Directory.Exists(o.OutputDirectory)) Directory.Delete(o.OutputDirectory, recursive: true);
         foreach (var (rel, content) in files)
         {
@@ -163,6 +178,7 @@ static class Site
             File.WriteAllText(target, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
         CopyDirectory(Path.Combine(o.SiteDirectory, "assets"), Path.Combine(o.OutputDirectory, "assets"));
+        foreach (var file in rootFiles) File.Copy(file, Path.Combine(o.OutputDirectory, Path.GetFileName(file)), overwrite: false);
         return files.Keys.Count(k => k.EndsWith(".html", StringComparison.Ordinal));
     }
 

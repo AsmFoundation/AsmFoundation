@@ -6,6 +6,19 @@ path:
 body: home
 scripts: opcodes.js seal.js home.js
 -->
+<!-- Structured data for search engines, on the home page only (Google reads the site name from the home page):
+     the site's name as Google should print it over our results, and the organization behind it with its logo
+     (512 px, square: Google wants at least 112 px). The description is the owner's line of 2026-11-26. -->
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@graph": [
+  {"@type": "WebSite", "@id": "https://asmfoundation.github.io/#website", "url": "https://asmfoundation.github.io/",
+   "name": "AsmFoundation", "alternateName": "Asm Foundation", "publisher": {"@id": "https://asmfoundation.github.io/#organization"}},
+  {"@type": "Organization", "@id": "https://asmfoundation.github.io/#organization", "url": "https://asmfoundation.github.io/",
+   "name": "AsmFoundation", "alternateName": "Asm Foundation", "logo": "https://asmfoundation.github.io/assets/icon-512.png",
+   "description": "Software written in assembly providing competitive FOSAS cloud/backend infrastructure with exceptional performance for any platform or container or programming language",
+   "sameAs": ["https://github.com/AsmFoundation"]}
+]}
+</script>
 <script>
   // This visit's seal animation, picked before the table renders so a lifted table never flashes.
   // The owner's rule: one of the three animations, a different one on every load (the static seal only for
