@@ -1,0 +1,5 @@
+# Python's spawned workers import an entry as a module and may cache its bytecode beside it.
+__pycache__/
+# Cargo's output, should a crate be built from its folder without the driver's CARGO_TARGET_DIR
+# (the driver puts builds and inputs under %LOCALAPPDATA%\asmfoundation-benchmarks\work).
+target/

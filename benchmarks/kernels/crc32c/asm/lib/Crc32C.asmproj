@@ -1,0 +1,19 @@
+<Project Sdk="AsmFoundation.Sdk">
+  <!--
+    The assembly entry's library: AsmSdk's Crc32C sample, built by the released AsmFoundation.Sdk
+    from nuget.org (the version is in global.json), into crc32c.dll and libcrc32c.so.
+
+    The sources are a copy of the sample's x64 files at AsmSdk 7c4ad4f (crc32c.asm,
+    include/crc32c.inc, crc32c.map), unchanged; the kernel's README gives their SHA-256, so a
+    difference from the sample shows. The library picks its fastest path on its first call: the
+    3-way kernel (three crc32 chains merged with pclmulqdq) on any CPU with SSE4.2 and PCLMULQDQ.
+
+    benchmarks/run.cs builds it with: dotnet build -c Release (from this folder). The harness in
+    ../harness loads the result and calls crc32c_append directly, with no foreign-function layer.
+  -->
+  <PropertyGroup>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <AssemblyName>crc32c</AssemblyName>
+    <ExportsFile>crc32c.map</ExportsFile>
+  </PropertyGroup>
+</Project>

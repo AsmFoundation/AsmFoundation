@@ -1,0 +1,10 @@
+# The benchmarks' core guard: holds the timed cores' other hyperthreads with tpause waits, so no
+# other process's thread shares a timed core. Standard library only; built by benchmarks/run.cs.
+[package]
+name = "guard"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[profile.release]
+opt-level = 3

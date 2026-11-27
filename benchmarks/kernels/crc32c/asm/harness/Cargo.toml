@@ -1,0 +1,13 @@
+# The assembly entry's harness: loads ../lib's crc32c library and times crc32c_append with the
+# kernel's protocol (the same harness code as the Rust entry, common/harness.rs). Standard
+# library only. benchmarks/run.cs builds it with `cargo build --release` from this folder.
+[package]
+name = "crc32c-asm-harness"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

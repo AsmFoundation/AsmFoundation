@@ -1,0 +1,41 @@
+{
+  "machine": "13th Gen Intel(R) Core(TM) i9-13900K",
+  "os": "Microsoft Windows 10.0.26200",
+  "versions": {
+    "dotnet": "11.0.100",
+    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "go": "go version go1.27.4 windows/amd64",
+    "node": "v22.14.0",
+    "python": "Python 3.12.12"
+  },
+  "cpus": [
+    2,
+    4,
+    6,
+    8
+  ],
+  "guards": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "sizes": [
+    64,
+    1048576,
+    67108864
+  ],
+  "windows": [
+    0.5,
+    0.5,
+    2
+  ],
+  "warmups": [
+    2,
+    0.6,
+    1
+  ],
+  "rounds": 12,
+  "started": "2026-11-26T22:26:36.8498907+00:00"
+}

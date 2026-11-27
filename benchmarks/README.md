@@ -4,8 +4,11 @@ The same work, written in other languages at their best, measured against the fo
 project of this repository, not a repository of its own (the owner's words: "a benchmarks project (not
 repo)"), whose results go on the website's [Benchmarks page](https://asmfoundation.github.io/benchmarks/).
 
-> **Status: planned.** The scope below was decided on 2026-11-23; nothing is measured yet. Until a result
-> exists here, the Benchmarks page shows only the measurements the projects made themselves.
+> **Status: the first kernel is built.** The scope below was decided on 2026-11-23. On 2026-11-26 the owner
+> asked for the first competition: "best achievable in python, rust, go, C#, nodejs - try to have them
+> implement the best possible for 1 core and 4 cores", with a simple and an optimized C#, data from RAM and
+> bytes allocated per operation. That is [`kernels/crc32c`](kernels/crc32c/README.md), measured in
+> [`results/`](results/). The other five kernels and the other languages (C++, Java, Zig) are not built yet.
 
 ## What the owner decided (2026-11-23)
 
@@ -25,7 +28,7 @@ Each kernel is one our assembly already performs, so every comparison has a real
 
 | Kernel | What it tests | Our assembly | Measured as |
 |---|---|---|---|
-| CRC-32C, 64 B to 1 MiB | a hardware instruction, kept busy | AsmSdk's Crc32C sample | ns per call and GB/s |
+| CRC-32C, 64 B to 64 MiB ([built](kernels/crc32c/README.md)) | a hardware instruction, kept busy; data from RAM | AsmSdk's Crc32C sample | checksums/s, GB/s, time per call, bytes allocated per call |
 | Keyed hash of a key | hash-table hashing | KvAsm's AES-NI hash, and its SipHash-2-4 | ns per key |
 | HPACK Huffman decoding | bit-level, branchy decoding | HttpAsm's and KvAsm's HPACK | MB/s |
 | HTTP/1.1 request parsing | text protocol parsing | HttpAsm's parser | requests/s |
@@ -61,20 +64,31 @@ the code measured would not be that language's.
 - **Open entries.** All code is public, and anyone may replace an entry with a faster correct one by
   pull request, with the measurement that shows it.
 
-## How it will work
+## How it works
 
-These are the defaults the implementation starts from; each will be reviewed when it is built.
+The defaults the plan started from, and what building the first kernel changed (2026-11-26):
 
-- **Layout:** `kernels/<kernel>/` holds the kernel's specification, its inputs and reference outputs,
-  and one folder per entry (`asm/`, `csharp/`, `cpp/`, `go/`, `java/`, `javascript/`, `python/`,
-  `rust/`, `zig/`). `services/` follows the same pattern later. `results/<date>-<machine>/` holds each
-  session's raw runs and its summary.
-- **Timing:** each entry times itself in-process with its language's standard harness (BenchmarkDotNet,
-  Google Benchmark, `testing.B`, JMH, tinybench, `timeit`, criterion, `std.time`), on the same input
-  sizes, and writes one JSON summary in a shared format. The assembly is called from a native harness
-  with no foreign-function layer in between, so no entry pays for a call another does not make.
-- **The host:** the machine the Benchmarks page's other results come from, an Intel Core i9-13900K under
-  Linux. Every run is pinned to the same performance core: the CPU mixes performance and efficiency cores,
-  and a run must never land on the other kind.
-- **The driver:** a .NET file-based app (`run.cs`) builds every entry, verifies its outputs, runs the
-  paired rounds and writes the session's summary, which the site generator turns into charts.
+- **Layout, as planned:**
+  - `kernels/<kernel>/` holds the kernel's specification and one folder per entry (`asm/`,
+    `csharp/`, `go/`, `javascript/`, `python/`, `rust/` so far);
+  - `tools/` holds what the driver needs besides the entries (the core guard);
+  - `results/<date>-<machine>-<kernel>/` holds each session's raw runs and its summary;
+  - the inputs are generated, not committed: each kernel's README specifies them.
+- **Timing: one protocol, written in every language,** instead of each language's standard harness.
+  - BenchmarkDotNet, criterion, `testing.B` and the like time one thread, and the owner's question is
+    one core against four.
+  - So every entry runs the same windowed protocol: N threads, a barrier, a timed window, a stop
+    flag, checksums checked before and after. Each writes the same JSON lines.
+  - It also counts the bytes its runtime allocates. The kernel's README has the protocol.
+  - The assembly is still called from a native harness with no foreign-function layer in between.
+- **The host: the i9-13900K natively on Windows,** instead of under Linux.
+  - Windows can confine a process to chosen logical CPUs. Linux under WSL2 cannot keep a thread
+    off the efficiency cores: Hyper-V places the VM's CPUs where it likes.
+  - **"N cores" is a process confined to N performance cores** (the first hyperthread of
+    performance cores 1 to 4), at High priority, with power throttling (EcoQoS) off.
+  - Each timed core's other hyperthread is held for the whole run by `tools/guard`, which waits
+    there in `tpause`. A guard spinning on `pause` takes a varying share of the core (the CRC-32C
+    README has the trials).
+- **The driver, as planned:** `dotnet run benchmarks/run.cs -- <kernel>` builds every entry,
+  checks it against its own reference, runs the paired rounds, and writes the session's summary
+  (`summary.json` for the site's charts).

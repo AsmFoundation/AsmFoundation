@@ -1,0 +1,5 @@
+# Build for the CPU the benchmark runs on: the kernel's intrinsics then inline into every caller
+# (the benchmarks project's rules allow any compiler flags). Cargo reads this file only when it
+# runs from this folder, which is how benchmarks/run.cs builds the entry.
+[build]
+rustflags = ["-C", "target-cpu=native"]

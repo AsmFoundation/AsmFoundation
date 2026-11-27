@@ -1,0 +1,15 @@
+# The Rust entry of the CRC-32C kernel: the assembly's 3-way algorithm in std::arch intrinsics,
+# standard library only. Built by benchmarks/run.cs with `cargo build --release` from this
+# folder, so that .cargo/config.toml's target-cpu=native applies.
+[package]
+name = "crc32c-rust"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[profile.release]
+# Whole-program optimization: the harness's closure-free fn pointer and the kernel get inlined
+# and specialized together, as the fastest build a Rust expert would ship.
+opt-level = 3
+lto = "fat"
+codegen-units = 1
