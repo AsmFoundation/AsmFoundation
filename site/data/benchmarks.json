@@ -1,10 +1,11 @@
-// The Benchmarks page's charts, in the order shown, two per row. KvAsm's and GrpcAsm's rows put one core on the
-// left and four on the right. CRC-32C puts its two one-core charts on one row and their four-core charts on the
-// row directly below, each under its one-core chart (the owner, 2026-11-26: "1core like we have now but below it
-// 4 core aswell"); the one-core charts keep the 2026-11-19 run and the four-core charts come from 2026-11-26's,
-// so each four-core note gives its own run's one-core figures (the owner's choice, "Build as picked").
-// Each row of a chart: label, value (in the chart's unit, 0..max), the text shown for it, "ours" for our
-// bar, "show" to print a rival's value on its bar too. Every number is copied from the source it names.
+// The Benchmarks page's charts, in the order shown, two per row: one core on the left, four on the right.
+// KvAsm and GrpcAsm come from their projects' runs. The CRC-32C rows are the benchmarks project's first kernel,
+// every language at its best against the assembly (the owner, 2026-11-26/27: "best achievable in python, rust,
+// go, C#, nodejs"; "Replace today's CRC-32C"); their figures are the medians in its results' summary.json.
+// Each row of a chart: label, value (in the chart's unit, within the axis), the text shown for it, "ours" for our
+// bar, "show" to print a rival's value on its bar too. "scale": "log" puts the axis on a log scale from "min"
+// to "max" (the owner's "Linear, log at 64 MiB": only where Python's seconds would flatten every other bar).
+// Every number is copied from the source it names.
 {
   "charts": [
     {
@@ -62,55 +63,114 @@
       "url": "https://github.com/AsmFoundation/GrpcAsm/blob/main/benchmarks/endtoend/2026-11-20-aspnet/README.md"
     },
     {
-      "title": "CRC-32C of 1 MiB, one core",
-      "question": "GB/s, called from C#; more is better",
-      "max": 25,
-      "rows": [
-        { "label": "Assembly", "value": 21.8, "text": "21.8 GB/s", "ours": true },
-        { "label": "C# loop", "value": 5.90, "text": "5.90 GB/s", "show": true }
-      ],
-      "ticks": [[0, "0"], [5, "5"], [10, "10"], [15, "15"], [20, "20"], [25, "25 GB/s"]],
-      "source": "AsmSdk Crc32C sample, i9-13900K, median of three runs",
-      "url": "https://asmfoundation.github.io/AsmSdk/examples/testing-and-benchmarks.html"
-    },
-    {
       "title": "CRC-32C of 64 bytes, one core",
-      "question": "Millions of checksums per second; more is better. Here C# wins: calling native code costs as much as the checksum",
-      "max": 350,
+      "question": "Checksums per second, each language at its best; more is better",
+      "max": 400,
       "rows": [
-        { "label": "Assembly", "value": 76.9, "text": "76.9M", "ours": true },
-        { "label": "C# loop", "value": 299, "text": "299M", "show": true }
+        { "label": "Assembly", "value": 105, "text": "105M", "ours": true },
+        { "label": "C# loop", "value": 234, "text": "234M", "show": true },
+        { "label": "C# at its best", "value": 178, "text": "178M", "show": true },
+        { "label": "Rust", "value": 281, "text": "281M", "show": true },
+        { "label": "Go", "value": 86.7, "text": "86.7M", "show": true },
+        { "label": "JavaScript", "value": 22.8, "text": "22.8M", "show": true },
+        { "label": "Python", "value": 0.21, "text": "210k", "show": true }
       ],
-      "ticks": [[0, "0"], [100, "100M"], [200, "200M"], [300, "300M"]],
-      "note": "From 256 bytes on the assembly wins: 1.16× at 256 bytes, 3.1× at 1 KiB. (Converted from 13.0 and 3.35 ns per call.)",
-      "source": "AsmSdk Crc32C sample, i9-13900K, median of three runs",
-      "url": "https://asmfoundation.github.io/AsmSdk/examples/testing-and-benchmarks.html"
-    },
-    {
-      "title": "CRC-32C of 1 MiB, four cores",
-      "question": "GB/s of four cores at once, each checksumming its own 1 MiB; more is better",
-      "max": 100,
-      "rows": [
-        { "label": "Assembly", "value": 79.9, "text": "79.9 GB/s", "ours": true },
-        { "label": "C# loop", "value": 23.0, "text": "23.0 GB/s", "show": true }
-      ],
-      "ticks": [[0, "0"], [25, "25"], [50, "50"], [75, "75"], [100, "100 GB/s"]],
-      "note": "From a different run than the chart above: that run's own one-core figures were 20.0 and 5.74 GB/s, so its totals grew 4.0×.",
-      "source": "AsmSdk Crc32C sample, 2026-11-26: 3 runs of 12 paired rounds, one core and four, pinned",
-      "url": "https://github.com/AsmFoundation/AsmSdk/blob/main/samples/Crc32C.Bench/results/2026-11-26-i9-13900K-cores/README.md"
+      "ticks": [[0, "0"], [100, "100M"], [200, "200M"], [300, "300M"], [400, "400M"]],
+      "note": "Here the languages that inline the checksum win: the assembly is a library, and each call also pays a jump and size checks that inlined code skips, which at 64 bytes cost more than the checksum itself. Bytes allocated per call: JavaScript 16 (it boxes the 32-bit result), every other entry 0; Python's are not counted.",
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
     },
     {
       "title": "CRC-32C of 64 bytes, four cores",
-      "question": "Millions of checksums per second, four cores at once; more is better",
-      "max": 800,
+      "question": "Checksums per second, all four cores; more is better",
+      "max": 1250,
       "rows": [
-        { "label": "Assembly", "value": 461, "text": "461M", "ours": true },
-        { "label": "C# loop", "value": 749, "text": "749M", "show": true }
+        { "label": "Assembly", "value": 385, "text": "385M", "ours": true },
+        { "label": "C# loop", "value": 911, "text": "911M", "show": true },
+        { "label": "C# at its best", "value": 685, "text": "685M", "show": true },
+        { "label": "Rust", "value": 1060, "text": "1.06G", "show": true },
+        { "label": "Go", "value": 338, "text": "338M", "show": true },
+        { "label": "JavaScript", "value": 89.0, "text": "89.0M", "show": true },
+        { "label": "Python", "value": 0.809, "text": "809k", "show": true }
       ],
-      "ticks": [[0, "0"], [200, "200M"], [400, "400M"], [600, "600M"], [800, "800M"]],
-      "note": "From a different run than the chart above: that run's own one-core figures were 115M and 187M, so both totals grew 4.0×.",
-      "source": "AsmSdk Crc32C sample, 2026-11-26: 3 runs of 12 paired rounds, one core and four, pinned",
-      "url": "https://github.com/AsmFoundation/AsmSdk/blob/main/samples/Crc32C.Bench/results/2026-11-26-i9-13900K-cores/README.md"
+      "ticks": [[0, "0"], [250, "250M"], [500, "500M"], [750, "750M"], [1000, "1G"], [1250, "1.25G"]],
+      "note": "Every entry does 3.7 to 3.9 times its one-core total on four cores: none collapses on one core once warmed up.",
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
+    },
+    {
+      "title": "CRC-32C of 1 MiB, one core",
+      "question": "GB/s, each language at its best; more is better",
+      "max": 25,
+      "rows": [
+        { "label": "Assembly", "value": 21.6, "text": "21.6 GB/s", "ours": true },
+        { "label": "C# loop", "value": 5.75, "text": "5.75 GB/s", "show": true },
+        { "label": "C# at its best", "value": 21.6, "text": "21.6 GB/s", "show": true },
+        { "label": "Rust", "value": 21.6, "text": "21.6 GB/s", "show": true },
+        { "label": "Go", "value": 21.3, "text": "21.3 GB/s", "show": true },
+        { "label": "JavaScript", "value": 1.76, "text": "1.76 GB/s", "show": true },
+        { "label": "Python", "value": 0.0113, "text": "0.0113 GB/s", "show": true }
+      ],
+      "ticks": [[0, "0"], [5, "5"], [10, "10"], [15, "15"], [20, "20"], [25, "25 GB/s"]],
+      "note": "C# at its best and Rust run the assembly's own algorithm in intrinsics, and Go's standard library runs Go's own assembly: all three match it. JavaScript and Python cannot reach the crc32 instruction.",
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
+    },
+    {
+      "title": "CRC-32C of 1 MiB, four cores",
+      "question": "GB/s, all four cores; more is better",
+      "max": 100,
+      "rows": [
+        { "label": "Assembly", "value": 78.3, "text": "78.3 GB/s", "ours": true },
+        { "label": "C# loop", "value": 22.2, "text": "22.2 GB/s", "show": true },
+        { "label": "C# at its best", "value": 82.5, "text": "82.5 GB/s", "show": true },
+        { "label": "Rust", "value": 79.8, "text": "79.8 GB/s", "show": true },
+        { "label": "Go", "value": 82.7, "text": "82.7 GB/s", "show": true },
+        { "label": "JavaScript", "value": 6.83, "text": "6.83 GB/s", "show": true },
+        { "label": "Python", "value": 0.0349, "text": "0.0349 GB/s", "show": true }
+      ],
+      "ticks": [[0, "0"], [25, "25"], [50, "50"], [75, "75"], [100, "100 GB/s"]],
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
+    },
+    {
+      "title": "CRC-32C of 64 MiB from RAM, one core",
+      "question": "Time per 64 MiB checksum; less is better. A log scale: each step of the axis is ten times the last",
+      "scale": "log",
+      "min": 1,
+      "max": 10000,
+      "rows": [
+        { "label": "Assembly", "value": 4.82, "text": "4.82 ms", "ours": true },
+        { "label": "C# loop", "value": 11.8, "text": "11.8 ms", "show": true },
+        { "label": "C# at its best", "value": 4.75, "text": "4.75 ms", "show": true },
+        { "label": "Rust", "value": 4.89, "text": "4.89 ms", "show": true },
+        { "label": "Go", "value": 4.81, "text": "4.81 ms", "show": true },
+        { "label": "JavaScript", "value": 70.0, "text": "70.0 ms", "show": true },
+        { "label": "Python", "value": 5920, "text": "5.92 s", "show": true }
+      ],
+      "ticks": [[1, "1 ms"], [10, "10 ms"], [100, "100 ms"], [1000, "1 s"], [10000, "10 s"]],
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
+    },
+    {
+      "title": "CRC-32C of 64 MiB from RAM, four cores",
+      "question": "Time per 64 MiB checksum on each core, all four at once; less is better. A log scale",
+      "scale": "log",
+      "min": 1,
+      "max": 10000,
+      "rows": [
+        { "label": "Assembly", "value": 6.63, "text": "6.63 ms", "ours": true },
+        { "label": "C# loop", "value": 12.3, "text": "12.3 ms", "show": true },
+        { "label": "C# at its best", "value": 6.36, "text": "6.36 ms", "show": true },
+        { "label": "Rust", "value": 6.77, "text": "6.77 ms", "show": true },
+        { "label": "Go", "value": 6.35, "text": "6.35 ms", "show": true },
+        { "label": "JavaScript", "value": 72.5, "text": "72.5 ms", "show": true },
+        { "label": "Python", "value": 7150, "text": "7.15 s", "show": true }
+      ],
+      "ticks": [[1, "1 ms"], [10, "10 ms"], [100, "100 ms"], [1000, "1 s"], [10000, "10 s"]],
+      "note": "Four cores share the memory: the fastest entries reach about 40 GB/s together and each checksum takes a third longer than on one core alone; the C# loop is too slow to notice.",
+      "source": "AsmFoundation benchmarks, CRC-32C, 2026-11-27: 12 paired rounds",
+      "url": "https://github.com/AsmFoundation/AsmFoundation/tree/main/benchmarks/results/2026-11-27-i9-13900K-crc32c"
     }
   ]
 }

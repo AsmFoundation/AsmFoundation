@@ -576,10 +576,13 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
 
     /// <summary>The Benchmarks page: one bar chart per entry of data/benchmarks.json, with a table view and its source.</summary>
     /// <returns>The charts' HTML.</returns>
-    /// <exception cref="BuildException">A chart lacks a field, or a value lies outside 0..max (the bar would overflow its track).</exception>
+    /// <exception cref="BuildException">A chart lacks a field, has an unknown scale, or a value or tick lies outside its
+    /// axis (the bar would overflow its track, or a log axis would have no place for it).</exception>
     /// <remarks>Bars are plain HTML, so the charts read without JavaScript; site.js only adds tooltips. Our bar and the
     /// rows flagged <c>show</c> carry their value; every other value is in the tooltip and the table, so no chart
-    /// prints a number on every bar.</remarks>
+    /// prints a number on every bar. A chart with <c>"scale": "log"</c> draws its axis from <c>min</c> to <c>max</c>,
+    /// each step ten times the last: for figures that span orders of magnitude, where a linear axis would leave every
+    /// bar but one a sliver. Linear stays the default, since equal lengths for equal ratios read more exactly.</remarks>
     string Benchmarks()
     {
         var sb = new StringBuilder("<div class=\"charts\">");
@@ -589,6 +592,17 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
             var where = $"benchmarks.json: {title}";
             var max = c.Num("max", where);
             if (max <= 0) throw new BuildException($"{where}: max must be above zero.");
+            var log = c.OptStr("scale") switch
+            {
+                null or "linear" => false,
+                "log" => true,
+                var other => throw new BuildException($"{where}: \"scale\" is \"linear\" or \"log\", not \"{other}\"."),
+            };
+            // A log axis has no zero: it starts at "min", which every value and tick must reach.
+            var min = log ? c.Num("min", where) : 0;
+            if (log && !(min > 0 && min < max)) throw new BuildException($"{where}: a log scale needs 0 < min < max.");
+            // A value's distance along the axis, in percent of the track.
+            double Position(double v) => log ? 100 * Math.Log10(v / min) / Math.Log10(max / min) : 100 * v / max;
             sb.Append($"<section class=\"chart\" id=\"{H.Slug(title)}\"><h2>{H.E(title)}</h2><p class=\"q\">{H.E(c.Str("question", where))}</p><div class=\"bars\">");
             var table = new StringBuilder();
             foreach (var r in c.Arr("rows", where))
@@ -597,8 +611,8 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
                 var value = r.Num("value", where);
                 var text = r.Str("text", where);
                 var ours = r.Flag("ours");
-                if (value < 0 || value > max) throw new BuildException($"{where}: {label}'s value {value} lies outside 0..{max}.");
-                var pct = H.N(100 * value / max);
+                if (value < min || value > max || (log && value <= 0)) throw new BuildException($"{where}: {label}'s value {value} lies outside {min}..{max}.");
+                var pct = H.N(Position(value));
                 var val = ours || r.Flag("show") ? $"<span class=\"val\" style=\"left:calc({pct}% + 8px)\">{H.E(text)}</span>" : "";
                 sb.Append($"<div class=\"lab{(ours ? " hl" : "")}\">{H.E(label)}</div><div class=\"track\" data-tip=\"{H.E(label)}: {H.E(text)}\">")
                   .Append($"<div class=\"bar{(ours ? " hl" : "")}\" style=\"width:{pct}%\"></div>{val}</div>");
@@ -608,7 +622,9 @@ sealed class Parts(BuildOptions o, DataSet data, OrgHistory? history)
             foreach (var t in c.Arr("ticks", where))
             {
                 if (t.ValueKind != JsonValueKind.Array || t.GetArrayLength() != 2) throw new BuildException($"{where}: every tick is [value, \"label\"].");
-                sb.Append($"<span style=\"left:{H.N(100 * t[0].GetDouble() / max)}%\">{H.E(t[1].GetString())}</span>");
+                var at = t[0].GetDouble();
+                if (at < min || at > max) throw new BuildException($"{where}: the tick at {at} lies outside {min}..{max}.");
+                sb.Append($"<span style=\"left:{H.N(Position(at))}%\">{H.E(t[1].GetString())}</span>");
             }
             sb.Append("</div></div>");
             if (c.OptStr("note") is { } note) sb.Append($"<p class=\"note\">{H.E(note)}</p>");
