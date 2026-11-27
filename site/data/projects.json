@@ -160,9 +160,9 @@
     },
     {
       "name": "ContainersAsm",
-      "status": "des",
-      "stamp": "In design",
-      "date": "since 2026-11-26",
+      "status": "dev",
+      "stamp": "In development",
+      "date": "since 2026-11-27",
       "summary": "A container runtime and shim in assembly, and LinuxAsmOS images",
       "features": [
         "Drops in for runc and containerd's shim",

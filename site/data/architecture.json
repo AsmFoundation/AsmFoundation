@@ -5,12 +5,12 @@
 // writes it to architecture/drawing.svg as well, and that page shows the file from the website. One change here
 // updates both, after the next build.
 {
-  "updated": "2026-11-26",
-  "summary": "Section drawing of the foundation: machine code at the bottom, AsmSdk above it, HttpAsm and GrpcAsm above that, and sixteen service rooms on top, of which Cache is released and Storage and Containers are in design.",
+  "updated": "2026-11-27",
+  "summary": "Section drawing of the foundation: machine code at the bottom, AsmSdk above it, HttpAsm and GrpcAsm above that, and sixteen service rooms on top, of which Cache is released, Containers is in development and Storage is in design.",
   "foundation": "The foundation: x86-64, ARM64 and WebAssembly code",
   "services": [
     { "name": "Compute" },
-    { "name": "Containers", "status": "des", "project": "ContainersAsm", "text": "In design: a container runtime and shim in assembly, and LinuxAsmOS, the stripped Linux its images run on." },
+    { "name": "Containers", "status": "dev", "project": "ContainersAsm", "text": "In development: a container runtime and shim in assembly, and LinuxAsmOS, the stripped Linux its images run on." },
     { "name": "Functions" },
     { "name": "Storage", "status": "des", "project": "StorageAsm", "text": "In design: blob and S3-style object storage over gRPC, on its own NVMe engine." },
     { "name": "Database" },
